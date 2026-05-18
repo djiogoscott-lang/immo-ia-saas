@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Toaster } from 'sonner';
 
 import './globals.css';
 
@@ -39,6 +40,18 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="fr" suppressHydrationWarning>
       <body className="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50">
         {children}
+        <Toaster
+          position="bottom-right"
+          richColors
+          closeButton
+          duration={3500}
+          toastOptions={{
+            classNames: {
+              toast:
+                'font-sans rounded-xl border shadow-md',
+            },
+          }}
+        />
       </body>
     </html>
   );

@@ -13,6 +13,7 @@
 import { useChat } from '@ai-sdk/react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import {
   BarChart3,
   Check,
@@ -59,9 +60,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 interface AgentChatProps {
   agent: AgentConfig;
+  /** Cache le header (utile quand on est encapsulé dans AgentWorkspace qui a son propre header). */
+  hideHeader?: boolean;
 }
 
-export function AgentChat({ agent }: AgentChatProps) {
+export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   const Icon = ICON_MAP[agent.icon];
 
   const {
@@ -80,6 +83,9 @@ export function AgentChat({ agent }: AgentChatProps) {
     body: { agentId: agent.id },
     onError: (err) => {
       console.error('[AgentChat] erreur de streaming :', err);
+      toast.error("Erreur de communication avec l'agent", {
+        description: err.message,
+      });
     },
   });
 
@@ -110,23 +116,25 @@ export function AgentChat({ agent }: AgentChatProps) {
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-zinc-950">
-      {/* En-tête avec identité de l'agent */}
-      <header className="flex items-center gap-3 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/80">
-        <div
-          aria-hidden
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-900/50"
-        >
-          {Icon ? <Icon className="h-5 w-5" /> : null}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h1 className="font-semibold text-zinc-900 dark:text-zinc-50">
-            {agent.name}
-          </h1>
-          <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-            {agent.tagline}
-          </p>
-        </div>
-      </header>
+      {/* En-tête avec identité de l'agent (masqué quand encapsulé dans AgentWorkspace) */}
+      {!hideHeader && (
+        <header className="flex items-center gap-3 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/80">
+          <div
+            aria-hidden
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700 ring-1 ring-cyan-100 dark:bg-cyan-900/30 dark:text-cyan-300 dark:ring-cyan-900/50"
+          >
+            {Icon ? <Icon className="h-5 w-5" /> : null}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="font-semibold text-zinc-900 dark:text-zinc-50">
+              {agent.name}
+            </h1>
+            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+              {agent.tagline}
+            </p>
+          </div>
+        </header>
+      )}
 
       {/* Zone de conversation */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -134,7 +142,7 @@ export function AgentChat({ agent }: AgentChatProps) {
           {/* Greeting + templates de démarrage rapide (avant le 1er message) */}
           {!hasMessages && (
             <>
-              <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 to-white px-5 py-4 text-sm text-zinc-700 shadow-sm dark:border-emerald-900/40 dark:from-emerald-950/30 dark:to-zinc-900 dark:text-zinc-300">
+              <div className="rounded-2xl border border-cyan-100 bg-gradient-to-br from-cyan-50/70 to-white px-5 py-4 text-sm text-zinc-700 shadow-sm dark:border-cyan-900/40 dark:from-cyan-950/30 dark:to-zinc-900 dark:text-zinc-300">
                 {agent.greeting}
               </div>
 
@@ -185,7 +193,7 @@ export function AgentChat({ agent }: AgentChatProps) {
             placeholder={`Écris ton message à ${agent.name}…`}
             rows={1}
             disabled={isLoading}
-            className="flex-1 resize-none rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="flex-1 resize-none rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-zinc-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -205,7 +213,7 @@ export function AgentChat({ agent }: AgentChatProps) {
             <button
               type="submit"
               disabled={!input.trim()}
-              className="flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none dark:disabled:bg-zinc-700"
+              className="flex shrink-0 items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-cyan-700 hover:shadow disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none dark:disabled:bg-zinc-700"
             >
               <Send className="h-4 w-4" aria-hidden />
               Envoyer
@@ -246,7 +254,7 @@ function MessageBubble({
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-emerald-600 px-4 py-2.5 text-sm text-white shadow-sm">
+        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-cyan-600 px-4 py-2.5 text-sm text-white shadow-sm">
           <div className="whitespace-pre-wrap leading-relaxed">{content}</div>
         </div>
       </div>
@@ -261,7 +269,7 @@ function MessageBubble({
           <MarkdownMessage>{content}</MarkdownMessage>
           {streaming && (
             <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-zinc-400">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-500" />
               en cours…
             </div>
           )}
@@ -299,10 +307,15 @@ function MessageActions({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(content);
+    const showCopiedFeedback = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      toast.success('Texte copié dans le presse-papiers');
+    };
+
+    try {
+      await navigator.clipboard.writeText(content);
+      showCopiedFeedback();
     } catch {
       // clipboard indisponible (Safari iframe, permission denied…) — fallback
       const ta = document.createElement('textarea');
@@ -313,8 +326,9 @@ function MessageActions({
       ta.select();
       try {
         document.execCommand('copy');
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        showCopiedFeedback();
+      } catch {
+        toast.error("Impossible de copier le texte");
       } finally {
         document.body.removeChild(ta);
       }
@@ -326,15 +340,24 @@ function MessageActions({
       .toISOString()
       .slice(0, 19)
       .replace(/[:.]/g, '-')}.md`;
-    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Fichier téléchargé', {
+        description: filename,
+      });
+    } catch (err) {
+      toast.error("Échec du téléchargement", {
+        description: err instanceof Error ? err.message : 'Erreur inconnue',
+      });
+    }
   };
 
   return (
@@ -345,7 +368,7 @@ function MessageActions({
         title={copied ? 'Copié !' : 'Copier le texte'}
       >
         {copied ? (
-          <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+          <Check className="h-3.5 w-3.5 text-cyan-600" aria-hidden />
         ) : (
           <Copy className="h-3.5 w-3.5" aria-hidden />
         )}
@@ -387,7 +410,7 @@ function ActionButton({ onClick, ariaLabel, title, children }: ActionButtonProps
       onClick={onClick}
       aria-label={ariaLabel}
       title={title}
-      className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium text-zinc-500 transition-colors hover:bg-slate-100 hover:text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+      className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium text-zinc-500 transition-colors hover:bg-slate-100 hover:text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
     >
       {children}
     </button>

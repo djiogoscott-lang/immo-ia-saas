@@ -129,7 +129,7 @@ export function AgentSidebar({
             🏠
           </span>
           <span>Nestenn</span>
-          <span className="ml-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+          <span className="ml-1 rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300">
             V2
           </span>
         </Link>

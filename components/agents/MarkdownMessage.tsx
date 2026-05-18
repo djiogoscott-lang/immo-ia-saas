@@ -49,7 +49,7 @@ const components: Components = {
 
   // Citations / blockquote
   blockquote: ({ children }) => (
-    <blockquote className="mb-3 border-l-4 border-emerald-300 bg-emerald-50/40 px-4 py-2 italic text-zinc-700 last:mb-0 dark:border-emerald-700 dark:bg-emerald-950/20 dark:text-zinc-300">
+    <blockquote className="mb-3 border-l-4 border-cyan-300 bg-cyan-50/40 px-4 py-2 italic text-zinc-700 last:mb-0 dark:border-cyan-700 dark:bg-cyan-950/20 dark:text-zinc-300">
       {children}
     </blockquote>
   ),
@@ -88,7 +88,7 @@ const components: Components = {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="font-medium text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-800 hover:decoration-emerald-500 dark:text-emerald-400 dark:decoration-emerald-700 dark:hover:text-emerald-300"
+      className="font-medium text-cyan-700 underline decoration-cyan-300 underline-offset-2 hover:text-cyan-800 hover:decoration-cyan-500 dark:text-cyan-400 dark:decoration-cyan-700 dark:hover:text-cyan-300"
     >
       {children}
     </a>

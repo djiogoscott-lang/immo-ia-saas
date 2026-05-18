@@ -14,7 +14,7 @@
 
 import { notFound } from 'next/navigation';
 
-import { AgentChat } from '@/components/agents/AgentChat';
+import { AgentWorkspace } from '@/components/agents/AgentWorkspace';
 import { getAgent, isValidAgentId } from '@/lib/agents/registry';
 
 interface AgentChatPageProps {
@@ -40,5 +40,5 @@ export default function AgentChatPage({ params }: AgentChatPageProps) {
 
   const agent = getAgent(params.agentId);
 
-  return <AgentChat agent={agent} />;
+  return <AgentWorkspace agent={agent} />;
 }

@@ -264,7 +264,7 @@ function AgentCard({ agent, style, categoryLabel }: AgentCardProps) {
             {AUDIENCE_LABELS[aud]}
           </span>
         ))}
-        <span className="ml-auto text-[11px] font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+        <span className="ml-auto text-[11px] font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
           Ouvrir →
         </span>
       </div>

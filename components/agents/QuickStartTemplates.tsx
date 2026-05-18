@@ -38,9 +38,9 @@ export function QuickStartTemplates({
             key={idx}
             type="button"
             onClick={() => onSelect(template.prompt)}
-            className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-700 dark:focus:ring-offset-zinc-950"
+            className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-cyan-700 dark:focus:ring-offset-zinc-950"
           >
-            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+            <div className="flex items-center gap-2 text-cyan-700 dark:text-cyan-400">
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
               <span className="text-[11px] font-semibold uppercase tracking-wider">
                 Suggestion {idx + 1}

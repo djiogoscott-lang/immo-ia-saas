@@ -17,7 +17,7 @@ export default function AgentsHomePage() {
     <div className="mx-auto max-w-6xl px-6 py-10 lg:px-10 lg:py-14">
       {/* Hero */}
       <header className="mb-8">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
           Plateforme multi-agents
         </p>
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-4xl">

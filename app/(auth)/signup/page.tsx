@@ -85,7 +85,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
       <header className="mb-6 text-center">
-        <p className="mb-1 text-xs font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+        <p className="mb-1 text-xs font-medium uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
           Nestenn IA
         </p>
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -100,7 +100,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
       )}
 
       {success && (
-        <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200">
+        <div className="mb-4 rounded-md border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-800 dark:border-cyan-900 dark:bg-cyan-950/50 dark:text-cyan-200">
           Inscription réussie. Si la confirmation email est activée, vérifie ta
           boîte de réception. Sinon, tu peux te{' '}
           <Link href="/login" className="font-medium underline">
@@ -123,7 +123,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
             name="full_name"
             type="text"
             autoComplete="name"
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
             placeholder="Prénom Nom"
           />
         </div>
@@ -141,7 +141,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
             type="email"
             autoComplete="email"
             required
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
             placeholder="prenom.nom@agence.fr"
           />
         </div>
@@ -157,7 +157,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
             id="role"
             name="role"
             defaultValue="conseiller"
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           >
             <option value="conseiller">Conseiller immobilier</option>
             <option value="manager">Manager / Directeur d'agence</option>
@@ -182,14 +182,14 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
             autoComplete="new-password"
             required
             minLength={8}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-zinc-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
             placeholder="Au moins 8 caractères"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+          className="w-full rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
         >
           Créer mon compte
         </button>
@@ -199,7 +199,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
         Déjà un compte ?{' '}
         <Link
           href="/login"
-          className="font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+          className="font-medium text-cyan-700 hover:underline dark:text-cyan-400"
         >
           Se connecter
         </Link>

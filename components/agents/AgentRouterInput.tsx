@@ -19,6 +19,7 @@
 import { ArrowRight, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface RoutingResult {
   agentId: string;
@@ -32,11 +33,9 @@ export function AgentRouterInput() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<RoutingResult | null>(null);
 
   const reset = () => {
-    setError(null);
     setPending(null);
   };
 
@@ -75,17 +74,20 @@ export function AgentRouterInput() {
         goToAgent(result.agentId, trimmed);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      toast.error("Impossible de router la requête", {
+        description: message,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-gradient-to-br from-emerald-50/50 to-white p-1 shadow-sm dark:border-zinc-800 dark:from-emerald-950/20 dark:to-zinc-900">
+    <div className="rounded-2xl border border-zinc-200 bg-gradient-to-br from-cyan-50/50 to-white p-1 shadow-sm dark:border-zinc-800 dark:from-cyan-950/20 dark:to-zinc-900">
       <form onSubmit={handleSubmit} className="flex items-center gap-2 p-2">
         <Sparkles
-          className="ml-2 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
+          className="ml-2 h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-400"
           aria-hidden
         />
         <input
@@ -100,7 +102,7 @@ export function AgentRouterInput() {
         <button
           type="submit"
           disabled={!query.trim() || loading}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-700"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 dark:disabled:bg-zinc-700"
         >
           {loading ? (
             <>
@@ -115,16 +117,6 @@ export function AgentRouterInput() {
           )}
         </button>
       </form>
-
-      {/* Erreur réseau / serveur */}
-      {error && (
-        <div className="mt-2 flex items-start gap-2 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:bg-red-950/50 dark:text-red-300">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-          <p>
-            <strong>Erreur :</strong> {error}
-          </p>
-        </div>
-      )}
 
       {/* Confiance faible : on demande confirmation */}
       {pending && (

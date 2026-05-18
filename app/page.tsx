@@ -1,11 +1,24 @@
+/**
+ * Page racine `/`.
+ *
+ * - Si l'utilisateur est connecté → redirige vers le dashboard `/agents`
+ * - Sinon → affiche la landing page publique (présentation produit + CTAs)
+ */
+
 import { redirect } from 'next/navigation';
 
-/**
- * Page racine `/` — redirige vers le dashboard agents.
- *
- * Quand l'auth Supabase sera branchée, cette page deviendra la landing /
- * page de login. Pour l'instant, on accède directement au dashboard.
- */
-export default function HomePage() {
-  redirect('/agents');
+import { LandingPage } from '@/components/landing/LandingPage';
+import { createClient } from '@/lib/supabase/server';
+
+export default async function HomePage() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/agents');
+  }
+
+  return <LandingPage />;
 }
