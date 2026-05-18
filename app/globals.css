@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables et styles globaux Nestenn IA V2.
+ * Toute personnalisation typographique ou de palette se fait via
+ * tailwind.config.ts (theme.extend), pas en CSS arbitraire. */
+
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Wrap des messages markdown générés par les agents */
+.prose pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

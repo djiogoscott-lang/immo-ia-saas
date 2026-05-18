@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+
+# Env files — NE JAMAIS COMMITER
+.env
+.env.*
+!.env.example
+*.env.download
+
+# Secrets (defense in depth)
+*.pem
+*.key
+id_rsa*
+.npmrc
+.netrc
+secrets/
+credentials/
+
+# Logs et caches
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Config Claude Code locale (personnelle, pas projet)
+.claude/
+
+# Documents source (à garder hors versionnement applicatif)
+Instructions GPT.docx
