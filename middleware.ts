@@ -35,6 +35,12 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  // Mode démo : auth complètement désactivée, toutes les routes accessibles
+  // publiquement. À activer via env var DEMO_MODE=true côté Vercel.
+  if (process.env.DEMO_MODE === 'true') {
+    return NextResponse.next();
+  }
+
   const { response, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
 

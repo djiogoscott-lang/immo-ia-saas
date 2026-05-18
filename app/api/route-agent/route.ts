@@ -25,19 +25,27 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  // 1. Auth : seuls les utilisateurs connectés peuvent utiliser le router
-  //    (sinon n'importe qui peut cramer notre crédit Haiku).
-  const user = await getCurrentUser();
-  if (!user) {
-    return Response.json(
-      { error: 'unauthorized', message: 'Connexion requise.' },
-      { status: 401 }
-    );
+  const isDemoMode = process.env.DEMO_MODE === 'true';
+
+  // 1. Auth : skip en mode démo. Sinon : user connecté obligatoire.
+  let identifier: string;
+  if (isDemoMode) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+    identifier = `router:ip:${ip}`;
+  } else {
+    const user = await getCurrentUser();
+    if (!user) {
+      return Response.json(
+        { error: 'unauthorized', message: 'Connexion requise.' },
+        { status: 401 }
+      );
+    }
+    identifier = `router:${user.id}`;
   }
 
-  // 2. Rate limit par user (in-memory MVP).
+  // 2. Rate limit (in-memory MVP).
   const rl = rateLimit({
-    identifier: `router:${user.id}`,
+    identifier,
     ...RATE_LIMITS.router,
   });
   if (!rl.success) {

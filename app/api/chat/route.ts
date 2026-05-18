@@ -82,18 +82,30 @@ function getOpenRouterClient() {
 // ---------------------------------------------------------------------------
 
 export async function POST(request: Request) {
-  // 1. Auth
-  const user = await getCurrentUser();
-  if (!user) {
-    return Response.json(
-      { error: 'unauthorized', message: 'Connexion requise.' },
-      { status: 401 }
-    );
+  const isDemoMode = process.env.DEMO_MODE === 'true';
+
+  // 1. Auth : skip en mode démo (auth désactivée pour l'accès libre).
+  //    Sinon : user connecté obligatoire.
+  let user: { id: string } | null = null;
+  let identifier: string;
+
+  if (isDemoMode) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+    identifier = `chat:ip:${ip}`;
+  } else {
+    user = await getCurrentUser();
+    if (!user) {
+      return Response.json(
+        { error: 'unauthorized', message: 'Connexion requise.' },
+        { status: 401 }
+      );
+    }
+    identifier = `chat:${user.id}`;
   }
 
   // 2. Rate limit
   const rl = rateLimit({
-    identifier: `chat:${user.id}`,
+    identifier,
     ...RATE_LIMITS.chat,
   });
   if (!rl.success) {
@@ -149,43 +161,45 @@ export async function POST(request: Request) {
   }
   const agent = getAgent(agentId);
 
-  // 5. Récupération ou création de la conversation
-  let conversation;
-  if (incomingConvId) {
-    conversation = await getConversation(incomingConvId);
-    // RLS Supabase garantit que seul le propriétaire récupère la conv ;
-    // mais on double-vérifie ici par robustesse.
-    if (!conversation || conversation.user_id !== user.id) {
-      return Response.json(
-        { error: 'conversation_not_found', message: 'Conversation introuvable.' },
-        { status: 404 }
-      );
-    }
-  } else {
-    const firstUserMsg = messages.find((m) => m.role === 'user');
-    conversation = await createConversation({
-      userId: user.id,
-      agentId,
-      title: firstUserMsg
-        ? generateConversationTitle(firstUserMsg.content)
-        : undefined,
-    });
-    if (!conversation) {
-      return Response.json(
-        { error: 'conversation_create_failed', message: 'Création de conversation impossible.' },
-        { status: 500 }
-      );
-    }
-  }
+  // 5. Récupération ou création de la conversation — SKIP en mode démo
+  //    (les tables Supabase ne sont pas requises). En mode normal : RLS Supabase.
+  let conversation: { id: string; user_id: string } | null = null;
 
-  // 6. Persistance du dernier message user (celui qui vient d'être envoyé)
-  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
-  if (lastUserMessage) {
-    await addMessage({
-      conversationId: conversation.id,
-      role: 'user',
-      content: lastUserMessage.content,
-    });
+  if (!isDemoMode) {
+    if (incomingConvId) {
+      conversation = await getConversation(incomingConvId);
+      if (!conversation || conversation.user_id !== user!.id) {
+        return Response.json(
+          { error: 'conversation_not_found', message: 'Conversation introuvable.' },
+          { status: 404 }
+        );
+      }
+    } else {
+      const firstUserMsg = messages.find((m) => m.role === 'user');
+      conversation = await createConversation({
+        userId: user!.id,
+        agentId,
+        title: firstUserMsg
+          ? generateConversationTitle(firstUserMsg.content)
+          : undefined,
+      });
+      if (!conversation) {
+        return Response.json(
+          { error: 'conversation_create_failed', message: 'Création de conversation impossible.' },
+          { status: 500 }
+        );
+      }
+    }
+
+    // 6. Persistance du dernier message user
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
+    if (lastUserMessage) {
+      await addMessage({
+        conversationId: conversation.id,
+        role: 'user',
+        content: lastUserMessage.content,
+      });
+    }
   }
 
   // 7. Préparation du client OpenRouter
@@ -208,27 +222,31 @@ export async function POST(request: Request) {
       messages: messages as CoreMessage[],
       temperature: agent.temperature,
       onFinish: async ({ text, usage }) => {
-        // Persiste la réponse de l'assistant à la fin du streaming.
-        // Si l'écriture échoue, on log mais on ne crashe pas le stream
-        // (le user a déjà reçu la réponse côté UI).
-        await addMessage({
-          conversationId: conversation.id,
-          role: 'assistant',
-          content: text,
-          tokensIn: usage?.promptTokens ?? null,
-          tokensOut: usage?.completionTokens ?? null,
-          modelUsed: agent.model,
-        });
+        // Persistance assistant — SKIP en mode démo.
+        if (!isDemoMode && conversation) {
+          await addMessage({
+            conversationId: conversation.id,
+            role: 'assistant',
+            content: text,
+            tokensIn: usage?.promptTokens ?? null,
+            tokensOut: usage?.completionTokens ?? null,
+            modelUsed: agent.model,
+          });
+        }
       },
     });
 
+    const responseHeaders: Record<string, string> = {
+      'X-RateLimit-Remaining': String(rl.remaining),
+      'X-RateLimit-Reset': String(rl.resetAt),
+    };
+    if (conversation) {
+      responseHeaders['X-Conversation-Id'] = conversation.id;
+    }
+
     return result.toDataStreamResponse({
       sendUsage: true,
-      headers: {
-        'X-Conversation-Id': conversation.id,
-        'X-RateLimit-Remaining': String(rl.remaining),
-        'X-RateLimit-Reset': String(rl.resetAt),
-      },
+      headers: responseHeaders,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';
