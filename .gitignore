@@ -9,6 +9,10 @@ out/
 build/
 next-env.d.ts
 
+# TypeScript cache
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
 # Env files — NE JAMAIS COMMITER
 .env
 .env.*
