@@ -82,7 +82,8 @@ function getOpenRouterClient() {
 // ---------------------------------------------------------------------------
 
 export async function POST(request: Request) {
-  const isDemoMode = process.env.DEMO_MODE === 'true';
+  // Mode démo activé par défaut — désactiver via DEMO_MODE=false en prod.
+  const isDemoMode = process.env.DEMO_MODE !== 'false';
 
   // 1. Auth : skip en mode démo (auth désactivée pour l'accès libre).
   //    Sinon : user connecté obligatoire.

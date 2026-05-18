@@ -36,8 +36,9 @@ function isPublicRoute(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   // Mode démo : auth complètement désactivée, toutes les routes accessibles
-  // publiquement. À activer via env var DEMO_MODE=true côté Vercel.
-  if (process.env.DEMO_MODE === 'true') {
+  // publiquement. ACTIVÉ PAR DÉFAUT — désactiver via DEMO_MODE=false en prod.
+  // ⚠️ TODO : repasser à `=== 'true'` dès que l'auth Supabase est validée.
+  if (process.env.DEMO_MODE !== 'false') {
     return NextResponse.next();
   }
 
