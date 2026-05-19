@@ -91,6 +91,12 @@ export interface AgentConfig {
   tagline: string;
   /** Nom du composant lucide-react (résolu via un mapping côté UI). */
   icon: string;
+  /**
+   * Chemin local vers un avatar custom (PNG/JPG/SVG dans /public/avatars/).
+   * Si non défini, AgentAvatar fait un fallback DiceBear (SVG auto-généré).
+   * Ex : '/avatars/charly.png'
+   */
+  avatar?: string;
   audience: readonly AgentAudience[];
   category: AgentCategory;
   /** Couleur d'accent Tailwind (teinte les cartes, badges, ring). */
@@ -436,6 +442,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     name: 'Charly — Orchestratrice',
     tagline: "Qualifie votre demande et la transfère à l'expert le plus adapté",
     icon: 'Sparkles',
+    // avatar: '/avatars/charly.png',  // À réactiver une fois l'image enregistrée dans public/avatars/
     audience: ['conseiller', 'manager', 'assistante'],
     category: 'orchestrateur',
     accent: 'indigo',
@@ -562,6 +569,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     name: 'Julia — Juridique & Conformité',
     tagline: 'Loi Hoguet, copropriété 1965, baux, mandats, obligations légales',
     icon: 'Scale',
+    // avatar: '/avatars/julia.png',  // À réactiver une fois l'image enregistrée dans public/avatars/
     audience: ['conseiller', 'manager', 'assistante'],
     category: 'analyse',
     accent: 'rose',
@@ -650,6 +658,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     name: 'Anaïs — Rédactrice Transactions',
     tagline: "Offre d'achat conforme + mails vendeur et acheteur associés",
     icon: 'FileSignature',
+    // avatar: '/avatars/anais.png',  // À réactiver une fois l'image enregistrée dans public/avatars/
     audience: ['conseiller', 'assistante', 'manager'],
     category: 'production',
     accent: 'lime',

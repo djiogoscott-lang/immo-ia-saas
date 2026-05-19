@@ -5,35 +5,17 @@
  *
  * Design Limova/NAIOM-like :
  *   - Cartes glassmorphism : bg semi-transparent + backdrop-blur
- *   - Bordures fines, ombres douces, accent coloré par agent
- *   - Badge "● En ligne" pulsé vert
+ *   - Avatars visuels (image custom si dispo, sinon DiceBear SVG auto-généré)
+ *   - Badge d'état directement intégré dans l'avatar (point coloré ready/active)
  *   - Animations Framer Motion (stagger d'entrée + hover lift)
- *   - 2 sections distinctes : "Équipe principale" (featured) + "Outils spécialisés"
+ *   - 2 sections : "Équipe principale" (featured, avatars LG) + "Outils spécialisés" (advanced, avatars MD)
  */
 
 import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import {
-  ArrowRight,
-  BarChart3,
-  Calculator,
-  ClipboardCheck,
-  DoorOpen,
-  FileSignature,
-  FileText,
-  Mailbox,
-  Megaphone,
-  PenSquare,
-  Phone,
-  Presentation,
-  Scale,
-  Sparkles,
-  TrendingUp,
-  Users,
-  Zap,
-  type LucideIcon,
-} from 'lucide-react';
 
+import { AgentAvatar } from '@/components/agents/AgentAvatar';
 import { getAccentStyle } from '@/lib/agents/accent-styles';
 import {
   ADVANCED_AGENTS,
@@ -41,29 +23,6 @@ import {
   type AgentConfig,
 } from '@/lib/agents/registry';
 import { cn } from '@/lib/utils';
-
-// ---------------------------------------------------------------------------
-// Mapping icônes Lucide
-// ---------------------------------------------------------------------------
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Sparkles,
-  Phone,
-  Megaphone,
-  PenSquare,
-  DoorOpen,
-  Calculator,
-  Scale,
-  Users,
-  Zap,
-  TrendingUp,
-  FileSignature,
-  FileText,
-  Mailbox,
-  Presentation,
-  BarChart3,
-  ClipboardCheck,
-};
 
 const AUDIENCE_LABELS: Record<AgentConfig['audience'][number], string> = {
   conseiller: 'Conseillers',
@@ -97,7 +56,7 @@ export function AgentGrid() {
 }
 
 // ---------------------------------------------------------------------------
-// Section (en-tête + grille)
+// Section
 // ---------------------------------------------------------------------------
 
 interface AgentSectionProps {
@@ -166,7 +125,7 @@ function AgentSection({
 }
 
 // ---------------------------------------------------------------------------
-// Carte d'un agent
+// Carte agent — avatar central, identité, tagline, footer audiences
 // ---------------------------------------------------------------------------
 
 interface AgentCardProps {
@@ -176,10 +135,9 @@ interface AgentCardProps {
 }
 
 function AgentCard({ agent, delay, subdued }: AgentCardProps) {
-  const Icon = ICON_MAP[agent.icon] ?? Sparkles;
   const accent = getAccentStyle(agent.accent);
 
-  // Split "Sarah — Coordinatrice RDV Vendeur" → ["Sarah", "Coordinatrice RDV Vendeur"]
+  // Split "Charly — Orchestratrice" → "Charly" + "Orchestratrice"
   const [firstName, ...roleParts] = agent.name.split('—').map((s) => s.trim());
   const role = roleParts.join(' — ');
 
@@ -188,64 +146,61 @@ function AgentCard({ agent, delay, subdued }: AgentCardProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay, ease: [0.2, 0.65, 0.3, 0.9] }}
-      whileHover={{ y: -3 }}
+      whileHover={{ y: -4 }}
     >
       <Link
         href={`/agents/${agent.id}`}
+        aria-label={`Ouvrir ${agent.name}`}
         className={cn(
-          'group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white/60 p-5 shadow-sm backdrop-blur-xl transition-all duration-200',
+          'group relative flex h-full flex-col overflow-hidden rounded-2xl border p-5 shadow-sm backdrop-blur-xl transition-all duration-200',
           'hover:shadow-xl',
           subdued
-            ? 'border-zinc-200/60 dark:border-zinc-800/40 dark:bg-zinc-900/40'
-            : 'border-zinc-200/80 dark:border-zinc-800/60 dark:bg-zinc-900/60',
+            ? 'border-zinc-200/60 bg-white/40 dark:border-zinc-800/40 dark:bg-zinc-900/40'
+            : 'border-zinc-200/80 bg-white/60 dark:border-zinc-800/60 dark:bg-zinc-900/60',
           accent.cardHoverBorder,
           accent.cardHoverShadow
         )}
       >
-        {/* Gradient subtil en arrière-plan, dévoilé au hover */}
+        {/* Halo coloré subtil, dévoilé au hover */}
         <div
           aria-hidden
           className={cn(
-            'pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100',
-            'from-transparent via-transparent to-transparent'
+            'pointer-events-none absolute -inset-x-8 -top-12 h-32 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-30',
+            accent.iconBg
           )}
         />
 
-        {/* Header : icône + badge En ligne */}
+        {/* Avatar + status (intégré) */}
         <div className="flex items-start justify-between">
-          <div
-            aria-hidden
+          <motion.div
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            whileHover={{ scale: 1.08 }}
+          >
+            <AgentAvatar
+              agentId={agent.id}
+              size={subdued ? 'md' : 'lg'}
+              status="ready"
+            />
+          </motion.div>
+
+          {/* Badge catégorie discret */}
+          <span
             className={cn(
-              'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset transition-transform duration-200 group-hover:scale-105',
-              accent.iconBg,
-              accent.iconText,
-              accent.iconRing
+              'rounded-full border border-current/20 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider backdrop-blur-md',
+              accent.badgeText
             )}
           >
-            <Icon className="h-5 w-5" strokeWidth={2} />
-          </div>
-
-          <span className="flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50/60 px-2 py-0.5 text-[10px] font-medium text-emerald-700 backdrop-blur-md dark:border-emerald-800/40 dark:bg-emerald-950/40 dark:text-emerald-400">
-            <span className="relative inline-flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
-            En ligne
+            {agent.category}
           </span>
         </div>
 
-        {/* Identité agent */}
-        <div className="mt-4">
-          <h3 className="text-base font-semibold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50">
+        {/* Identité */}
+        <div className="mt-5">
+          <h3 className="text-lg font-semibold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50">
             {firstName}
           </h3>
           {role && (
-            <p
-              className={cn(
-                'mt-0.5 text-xs font-medium',
-                accent.badgeText
-              )}
-            >
+            <p className={cn('mt-0.5 text-xs font-medium', accent.badgeText)}>
               {role}
             </p>
           )}
@@ -256,7 +211,7 @@ function AgentCard({ agent, delay, subdued }: AgentCardProps) {
           {agent.tagline}
         </p>
 
-        {/* Footer : audiences + CTA */}
+        {/* Footer audiences + CTA */}
         <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
           {agent.audience.map((aud) => (
             <span
@@ -268,10 +223,8 @@ function AgentCard({ agent, delay, subdued }: AgentCardProps) {
           ))}
           <span
             className={cn(
-              'ml-auto inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition-all duration-200',
-              'group-hover:translate-x-0.5',
-              `group-hover:${accent.accentText.split(' ')[0]}`,
-              `dark:group-hover:${accent.accentText.split(' ')[1]}`
+              'ml-auto inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition-transform duration-200 group-hover:translate-x-0.5',
+              accent.accentText
             )}
           >
             Ouvrir
