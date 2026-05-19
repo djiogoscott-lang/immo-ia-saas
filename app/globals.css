@@ -21,6 +21,53 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ===========================================================================
+ * Mode impression — page /agents/library/[id]/print
+ *
+ * Cache toute la chrome (sidebar, nav, toaster) et formate le contenu sur A4.
+ * Force le fond blanc et le texte noir indépendamment du thème dark.
+ * =========================================================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  /* Reset thème en print : fond blanc + texte noir lisible */
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    color-scheme: light !important;
+  }
+
+  /* Cache sidebar de navigation, toaster sonner et tout ce qui n'est pas la
+   * page imprimable. Cible aussi les conteneurs flex du layout (app)/agents. */
+  aside[aria-label*="Navigation"],
+  [aria-label="Notifications alt+T"],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Le main prend toute la largeur, scroll désactivé */
+  main {
+    overflow: visible !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .print-page {
+    box-shadow: none !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Eviter les coupures à l'intérieur d'un titre / paragraphe */
+  h1, h2, h3, h4, pre, blockquote {
+    page-break-inside: avoid;
+  }
+}
+
 /* Wrap des messages markdown générés par les agents */
 .prose pre {
   white-space: pre-wrap;
