@@ -5,43 +5,30 @@
  * page d'accueil `/agents`. Permet à l'utilisateur de décrire son besoin sans
  * choisir manuellement un agent.
  *
- * Flow :
+ * Flow (NAIOM-inspired, orchestrateur visible) :
  *   1. user tape sa demande et soumet
- *   2. POST /api/route-agent { query }
- *   3. réponse { agentId, confidence, reasoning }
- *   4. redirection vers /agents/[agentId]?prefill=<query>
- *   5. AgentChat lit `prefill` via useSearchParams et l'envoie comme 1er message
- *
- * Si la confiance est faible (< 0.5), on affiche un avertissement avant de
- * laisser l'utilisateur confirmer (ou choisir manuellement).
+ *   2. POST /api/route-agent → stream SSE de 3 phases
+ *   3. <OrchestratorBubble> affiche progressivement Charly qui qualifie + handoff
+ *   4. Auto-redirect vers /agents/[agentId]?prefill=<query> après ~2s
+ *      (sauf si confiance < 0.5 → confirmation manuelle)
  */
 
-import { ArrowRight, Loader2, Sparkles, AlertCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-interface RoutingResult {
-  agentId: string;
-  confidence: number;
-  reasoning: string;
-}
-
-const LOW_CONFIDENCE_THRESHOLD = 0.5;
+import {
+  OrchestratorBubble,
+  type OrchestratorEvent,
+} from '@/components/agents/OrchestratorBubble';
 
 export function AgentRouterInput() {
-  const router = useRouter();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [pending, setPending] = useState<RoutingResult | null>(null);
+  const [events, setEvents] = useState<OrchestratorEvent[]>([]);
 
   const reset = () => {
-    setPending(null);
-  };
-
-  const goToAgent = (agentId: string, prefill: string) => {
-    const params = new URLSearchParams({ prefill });
-    router.push(`/agents/${agentId}?${params.toString()}`);
+    setEvents([]);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -49,8 +36,9 @@ export function AgentRouterInput() {
     const trimmed = query.trim();
     if (!trimmed || loading) return;
 
-    reset();
+    setEvents([]);
     setLoading(true);
+
     try {
       const response = await fetch('/api/route-agent', {
         method: 'POST',
@@ -65,19 +53,44 @@ export function AgentRouterInput() {
         throw new Error(data.message ?? `Erreur ${response.status}`);
       }
 
-      const result = (await response.json()) as RoutingResult;
+      if (!response.body) {
+        throw new Error('Réponse sans flux de streaming.');
+      }
 
-      if (result.confidence < LOW_CONFIDENCE_THRESHOLD) {
-        // On bloque la redirection pour laisser l'utilisateur confirmer
-        setPending(result);
-      } else {
-        goToAgent(result.agentId, trimmed);
+      // Lecture du stream SSE événement par événement.
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Format SSE : "data: ${json}\n\n" → on découpe sur \n\n
+        const chunks = buffer.split('\n\n');
+        buffer = chunks.pop() ?? '';
+
+        for (const chunk of chunks) {
+          const line = chunk.trim();
+          if (!line.startsWith('data:')) continue;
+          const payload = line.slice(5).trim();
+          if (!payload) continue;
+          try {
+            const ev = JSON.parse(payload) as OrchestratorEvent;
+            setEvents((prev) => [...prev, ev]);
+          } catch {
+            // Chunk JSON mal formé : on ignore silencieusement.
+          }
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur inconnue';
-      toast.error("Impossible de router la requête", {
+      toast.error('Charly est indisponible', {
         description: message,
       });
+      setEvents([{ phase: 'error', message }]);
     } finally {
       setLoading(false);
     }
@@ -94,7 +107,7 @@ export function AgentRouterInput() {
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Décris ton besoin, je trouve l'agent (ex : « j'ai un RDV vendeur à synthétiser »)"
+          placeholder="Décris ton besoin, Charly te connecte au bon expert (ex : « j'ai un RDV vendeur à synthétiser »)"
           disabled={loading}
           aria-label="Décris ton besoin pour qu'un agent soit choisi automatiquement"
           className="flex-1 bg-transparent px-2 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none disabled:opacity-60 dark:text-zinc-50"
@@ -111,46 +124,21 @@ export function AgentRouterInput() {
             </>
           ) : (
             <>
-              <span>Trouver l'agent</span>
+              <span>Demander à Charly</span>
               <ArrowRight className="h-4 w-4" aria-hidden />
             </>
           )}
         </button>
       </form>
 
-      {/* Confiance faible : on demande confirmation */}
-      {pending && (
-        <div className="mt-2 rounded-lg bg-amber-50 p-4 text-sm dark:bg-amber-950/40">
-          <div className="flex items-start gap-2 text-amber-800 dark:text-amber-200">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-            <div className="flex-1">
-              <p>
-                <strong>Confiance faible</strong> ({Math.round(pending.confidence * 100)} %).
-                Je propose l'agent <code className="font-mono">{pending.agentId}</code> :
-                {' '}
-                <em>{pending.reasoning}</em>
-              </p>
-              <p className="mt-1 text-xs opacity-80">
-                Tu peux confirmer ce choix ou sélectionner manuellement un agent dans la liste ci-dessous.
-              </p>
-            </div>
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              type="button"
-              onClick={() => goToAgent(pending.agentId, query.trim())}
-              className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
-            >
-              Continuer avec {pending.agentId}
-            </button>
-            <button
-              type="button"
-              onClick={reset}
-              className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-50 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200 dark:hover:bg-amber-900"
-            >
-              Choisir manuellement
-            </button>
-          </div>
+      {/* Bulle Charly — affichée pendant le streaming et après le handoff. */}
+      {events.length > 0 && (
+        <div className="px-2 pb-2">
+          <OrchestratorBubble
+            events={events}
+            query={query.trim()}
+            onReset={reset}
+          />
         </div>
       )}
     </div>
