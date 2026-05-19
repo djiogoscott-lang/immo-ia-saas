@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
+  BookMarked,
   Calculator,
   ClipboardCheck,
   DoorOpen,
@@ -141,19 +142,31 @@ export function AgentSidebar({
         </Link>
       </div>
 
-      {/* Lien Accueil (grille agents) */}
-      <div className="border-b border-zinc-200/60 px-2 py-3 dark:border-zinc-800/40">
+      {/* Liens principaux : Accueil + Bibliothèque */}
+      <div className="space-y-0.5 border-b border-zinc-200/60 px-2 py-3 dark:border-zinc-800/40">
         <Link
           href="/agents"
           className={cn(
             'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all',
-            currentAgentId === null
+            currentAgentId === null && !pathname.startsWith('/agents/library')
               ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
               : 'text-zinc-700 hover:bg-zinc-100/60 dark:text-zinc-300 dark:hover:bg-zinc-800/40'
           )}
         >
           <Home className="h-4 w-4 shrink-0" aria-hidden strokeWidth={2} />
           <span className="font-medium">Tous les agents</span>
+        </Link>
+        <Link
+          href="/agents/library"
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all',
+            pathname.startsWith('/agents/library')
+              ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
+              : 'text-zinc-700 hover:bg-zinc-100/60 dark:text-zinc-300 dark:hover:bg-zinc-800/40'
+          )}
+        >
+          <BookMarked className="h-4 w-4 shrink-0" aria-hidden strokeWidth={2} />
+          <span className="font-medium">Bibliothèque</span>
         </Link>
       </div>
 

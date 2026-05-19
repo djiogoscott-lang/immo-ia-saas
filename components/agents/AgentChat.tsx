@@ -41,6 +41,7 @@ import {
 
 import { MarkdownMessage } from '@/components/agents/MarkdownMessage';
 import { QuickStartTemplates } from '@/components/agents/QuickStartTemplates';
+import { SaveDeliverableButton } from '@/components/agents/SaveDeliverableButton';
 import type { AgentConfig } from '@/lib/agents/registry';
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -288,6 +289,7 @@ function MessageBubble({
         {isLastAssistant && !streaming && content.length > 0 && (
           <MessageActions
             content={content}
+            agentId={agent.id}
             agentName={agent.name}
             onRegenerate={onRegenerate}
           />
@@ -303,12 +305,14 @@ function MessageBubble({
 
 interface MessageActionsProps {
   content: string;
+  agentId: AgentConfig['id'];
   agentName: string;
   onRegenerate: () => void;
 }
 
 function MessageActions({
   content,
+  agentId,
   agentName,
   onRegenerate,
 }: MessageActionsProps) {
@@ -369,7 +373,8 @@ function MessageActions({
   };
 
   return (
-    <div className="flex items-center gap-1 px-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1 px-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
       <ActionButton
         onClick={handleCopy}
         ariaLabel="Copier le texte"
@@ -400,6 +405,15 @@ function MessageActions({
         <Download className="h-3.5 w-3.5" aria-hidden />
         <span>Exporter</span>
       </ActionButton>
+      </div>
+
+      {/* Bouton "Sauvegarder en livrable" — affichage et form gérés en interne */}
+      <div className="px-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
+        <SaveDeliverableButton
+          agentId={agentId}
+          markdownBody={content}
+        />
+      </div>
     </div>
   );
 }
