@@ -1,17 +1,20 @@
+'use client';
+
 /**
- * AgentGrid — vue d'accueil "/agents" affichant les agents sous forme de cartes.
- * Server component (pas de hooks).
+ * AgentGrid — grille premium des 11 agents (8 featured + 3 advanced).
  *
- * Palette de catégories :
- *   orchestrateur → Indigo  (Charly, hub central)
- *   production    → Emerald (livrables)
- *   communication → Sky     (marketing, RS, SEO, téléphonie)
- *   analyse       → Rose    (juridique, finance, DPE, data)
- *   pilotage      → Violet  (management, RH, KPIs)
+ * Design Limova/NAIOM-like :
+ *   - Cartes glassmorphism : bg semi-transparent + backdrop-blur
+ *   - Bordures fines, ombres douces, accent coloré par agent
+ *   - Badge "● En ligne" pulsé vert
+ *   - Animations Framer Motion (stagger d'entrée + hover lift)
+ *   - 2 sections distinctes : "Équipe principale" (featured) + "Outils spécialisés"
  */
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
+  ArrowRight,
   BarChart3,
   Calculator,
   ClipboardCheck,
@@ -31,14 +34,16 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { getAccentStyle } from '@/lib/agents/accent-styles';
 import {
-  AGENT_LIST,
-  type AgentCategory,
+  ADVANCED_AGENTS,
+  FEATURED_AGENTS,
   type AgentConfig,
 } from '@/lib/agents/registry';
+import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
-// Mappings visuels
+// Mapping icônes Lucide
 // ---------------------------------------------------------------------------
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -60,92 +65,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   ClipboardCheck,
 };
 
-const CATEGORY_LABELS: Record<AgentCategory, string> = {
-  orchestrateur: 'Orchestration',
-  production: 'Production',
-  communication: 'Communication',
-  analyse: 'Analyse',
-  pilotage: 'Pilotage',
-};
-
-const CATEGORY_DESCRIPTIONS: Record<AgentCategory, string> = {
-  orchestrateur:
-    "Le hub central : qualifie votre demande et la route vers l'expert le plus adapté.",
-  production:
-    "Livrables prêts à l'emploi : prospection terrain, offre d'achat, kit RDV.",
-  communication:
-    'Téléphonie, marketing & réseaux sociaux, SEO et rédaction web.',
-  analyse:
-    'Juridique, finances, DPE et études de marché chiffrées.',
-  pilotage:
-    "Recrutement, animation d'équipe, suivi de performance, KPIs.",
-};
-
-interface CategoryStyle {
-  /** Texte du badge catégorie (couleur foncée). */
-  badgeText: string;
-  /** Fond du badge catégorie (teinte claire). */
-  badgeBg: string;
-  /** Couleur de l'icône de l'agent (fond + texte). */
-  iconBg: string;
-  iconText: string;
-  /** Bordure de la carte au survol. */
-  hoverBorder: string;
-  /** Couleur du séparateur de section (barre verticale). */
-  accentBar: string;
-}
-
-const CATEGORY_STYLES: Record<AgentCategory, CategoryStyle> = {
-  orchestrateur: {
-    badgeText: 'text-indigo-700 dark:text-indigo-300',
-    badgeBg: 'bg-indigo-50 dark:bg-indigo-900/30',
-    iconBg: 'bg-indigo-50 dark:bg-indigo-900/30',
-    iconText: 'text-indigo-600 dark:text-indigo-300',
-    hoverBorder: 'hover:border-indigo-300 dark:hover:border-indigo-700',
-    accentBar: 'bg-indigo-400',
-  },
-  production: {
-    badgeText: 'text-emerald-700 dark:text-emerald-300',
-    badgeBg: 'bg-emerald-50 dark:bg-emerald-900/30',
-    iconBg: 'bg-emerald-50 dark:bg-emerald-900/30',
-    iconText: 'text-emerald-600 dark:text-emerald-300',
-    hoverBorder: 'hover:border-emerald-300 dark:hover:border-emerald-700',
-    accentBar: 'bg-emerald-400',
-  },
-  communication: {
-    badgeText: 'text-sky-700 dark:text-sky-300',
-    badgeBg: 'bg-sky-50 dark:bg-sky-900/30',
-    iconBg: 'bg-sky-50 dark:bg-sky-900/30',
-    iconText: 'text-sky-600 dark:text-sky-300',
-    hoverBorder: 'hover:border-sky-300 dark:hover:border-sky-700',
-    accentBar: 'bg-sky-400',
-  },
-  analyse: {
-    badgeText: 'text-rose-700 dark:text-rose-300',
-    badgeBg: 'bg-rose-50 dark:bg-rose-900/30',
-    iconBg: 'bg-rose-50 dark:bg-rose-900/30',
-    iconText: 'text-rose-600 dark:text-rose-300',
-    hoverBorder: 'hover:border-rose-300 dark:hover:border-rose-700',
-    accentBar: 'bg-rose-400',
-  },
-  pilotage: {
-    badgeText: 'text-violet-700 dark:text-violet-300',
-    badgeBg: 'bg-violet-50 dark:bg-violet-900/30',
-    iconBg: 'bg-violet-50 dark:bg-violet-900/30',
-    iconText: 'text-violet-600 dark:text-violet-300',
-    hoverBorder: 'hover:border-violet-300 dark:hover:border-violet-700',
-    accentBar: 'bg-violet-400',
-  },
-};
-
-const CATEGORY_ORDER: readonly AgentCategory[] = [
-  'orchestrateur',
-  'communication',
-  'production',
-  'analyse',
-  'pilotage',
-] as const;
-
 const AUDIENCE_LABELS: Record<AgentConfig['audience'][number], string> = {
   conseiller: 'Conseillers',
   manager: 'Managers',
@@ -157,58 +76,92 @@ const AUDIENCE_LABELS: Record<AgentConfig['audience'][number], string> = {
 // ---------------------------------------------------------------------------
 
 export function AgentGrid() {
-  const groups = CATEGORY_ORDER
-    .map((category) => ({
-      category,
-      label: CATEGORY_LABELS[category],
-      description: CATEGORY_DESCRIPTIONS[category],
-      style: CATEGORY_STYLES[category],
-      agents: AGENT_LIST.filter((agent) => agent.category === category),
-    }))
-    .filter((group) => group.agents.length > 0);
-
   return (
-    <div className="space-y-12">
-      {groups.map((group) => (
-        <section key={group.category} aria-labelledby={`cat-${group.category}`}>
-          <header className="mb-5 flex items-start gap-3">
-            <span
-              aria-hidden
-              className={`mt-1.5 inline-block h-7 w-1 shrink-0 rounded-full ${group.style.accentBar}`}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h2
-                  id={`cat-${group.category}`}
-                  className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
-                >
-                  {group.label}
-                </h2>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${group.style.badgeBg} ${group.style.badgeText}`}
-                >
-                  {group.agents.length} agent{group.agents.length > 1 ? 's' : ''}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                {group.description}
-              </p>
-            </div>
-          </header>
+    <div className="space-y-14">
+      <AgentSection
+        title="Équipe principale"
+        description="Vos 8 experts du quotidien immobilier — accessibles à tout moment."
+        agents={[...FEATURED_AGENTS]}
+        baseDelay={0}
+      />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {group.agents.map((agent) => (
-              <AgentCard
-                key={agent.id}
-                agent={agent}
-                style={CATEGORY_STYLES[agent.category]}
-                categoryLabel={CATEGORY_LABELS[agent.category]}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+      <AgentSection
+        title="Outils spécialisés"
+        description="Agents pointus pour les analyses approfondies — études de marché, DPE, rédaction d'offres."
+        agents={[...ADVANCED_AGENTS]}
+        baseDelay={0.3}
+        subdued
+      />
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Section (en-tête + grille)
+// ---------------------------------------------------------------------------
+
+interface AgentSectionProps {
+  title: string;
+  description: string;
+  agents: AgentConfig[];
+  baseDelay: number;
+  subdued?: boolean;
+}
+
+function AgentSection({
+  title,
+  description,
+  agents,
+  baseDelay,
+  subdued,
+}: AgentSectionProps) {
+  return (
+    <section aria-labelledby={`section-${title}`}>
+      <motion.header
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: baseDelay }}
+        className="mb-6"
+      >
+        <div className="flex items-baseline gap-3">
+          <h2
+            id={`section-${title}`}
+            className={cn(
+              'text-base font-semibold tracking-tight',
+              subdued
+                ? 'text-zinc-500 dark:text-zinc-400'
+                : 'text-zinc-900 dark:text-zinc-50'
+            )}
+          >
+            {title}
+          </h2>
+          <span className="rounded-full border border-zinc-200/60 bg-zinc-50/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-md dark:border-zinc-800/60 dark:bg-zinc-900/60 dark:text-zinc-400">
+            {agents.length} agent{agents.length > 1 ? 's' : ''}
+          </span>
+        </div>
+        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+          {description}
+        </p>
+      </motion.header>
+
+      <div
+        className={cn(
+          'grid gap-4',
+          subdued
+            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+        )}
+      >
+        {agents.map((agent, idx) => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            delay={baseDelay + 0.1 + idx * 0.04}
+            subdued={subdued}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -218,59 +171,114 @@ export function AgentGrid() {
 
 interface AgentCardProps {
   agent: AgentConfig;
-  style: CategoryStyle;
-  categoryLabel: string;
+  delay: number;
+  subdued?: boolean;
 }
 
-function AgentCard({ agent, style, categoryLabel }: AgentCardProps) {
-  const Icon = ICON_MAP[agent.icon];
+function AgentCard({ agent, delay, subdued }: AgentCardProps) {
+  const Icon = ICON_MAP[agent.icon] ?? Sparkles;
+  const accent = getAccentStyle(agent.accent);
+
+  // Split "Sarah — Coordinatrice RDV Vendeur" → ["Sarah", "Coordinatrice RDV Vendeur"]
+  const [firstName, ...roleParts] = agent.name.split('—').map((s) => s.trim());
+  const role = roleParts.join(' — ');
 
   return (
-    <Link
-      href={`/agents/${agent.id}`}
-      className={`group relative flex flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 ${style.hoverBorder}`}
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay, ease: [0.2, 0.65, 0.3, 0.9] }}
+      whileHover={{ y: -3 }}
     >
-      {/* Badge catégorie en haut à droite */}
-      <span
-        className={`absolute right-4 top-4 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${style.badgeBg} ${style.badgeText}`}
+      <Link
+        href={`/agents/${agent.id}`}
+        className={cn(
+          'group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white/60 p-5 shadow-sm backdrop-blur-xl transition-all duration-200',
+          'hover:shadow-xl',
+          subdued
+            ? 'border-zinc-200/60 dark:border-zinc-800/40 dark:bg-zinc-900/40'
+            : 'border-zinc-200/80 dark:border-zinc-800/60 dark:bg-zinc-900/60',
+          accent.cardHoverBorder,
+          accent.cardHoverShadow
+        )}
       >
-        {categoryLabel}
-      </span>
-
-      {/* Icône + nom */}
-      <div className="flex items-start gap-3 pr-20">
+        {/* Gradient subtil en arrière-plan, dévoilé au hover */}
         <div
           aria-hidden
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ring-black/[0.04] transition-transform group-hover:scale-105 ${style.iconBg} ${style.iconText}`}
-        >
-          {Icon ? <Icon className="h-5 w-5" strokeWidth={2} /> : null}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
-            {agent.name}
-          </h3>
-        </div>
-      </div>
+          className={cn(
+            'pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+            'from-transparent via-transparent to-transparent'
+          )}
+        />
 
-      {/* Tagline */}
-      <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-        {agent.tagline}
-      </p>
-
-      {/* Footer : audiences + chevron */}
-      <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3 dark:border-zinc-800">
-        {agent.audience.map((aud) => (
-          <span
-            key={aud}
-            className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:bg-zinc-800 dark:text-zinc-300"
+        {/* Header : icône + badge En ligne */}
+        <div className="flex items-start justify-between">
+          <div
+            aria-hidden
+            className={cn(
+              'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset transition-transform duration-200 group-hover:scale-105',
+              accent.iconBg,
+              accent.iconText,
+              accent.iconRing
+            )}
           >
-            {AUDIENCE_LABELS[aud]}
+            <Icon className="h-5 w-5" strokeWidth={2} />
+          </div>
+
+          <span className="flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50/60 px-2 py-0.5 text-[10px] font-medium text-emerald-700 backdrop-blur-md dark:border-emerald-800/40 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <span className="relative inline-flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            En ligne
           </span>
-        ))}
-        <span className="ml-auto text-[11px] font-medium text-zinc-400 transition-all group-hover:translate-x-0.5 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
-          Ouvrir →
-        </span>
-      </div>
-    </Link>
+        </div>
+
+        {/* Identité agent */}
+        <div className="mt-4">
+          <h3 className="text-base font-semibold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50">
+            {firstName}
+          </h3>
+          {role && (
+            <p
+              className={cn(
+                'mt-0.5 text-xs font-medium',
+                accent.badgeText
+              )}
+            >
+              {role}
+            </p>
+          )}
+        </div>
+
+        {/* Tagline */}
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          {agent.tagline}
+        </p>
+
+        {/* Footer : audiences + CTA */}
+        <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
+          {agent.audience.map((aud) => (
+            <span
+              key={aud}
+              className="rounded-full bg-zinc-100/80 px-2 py-0.5 text-[10px] font-medium text-zinc-600 backdrop-blur-md dark:bg-zinc-800/80 dark:text-zinc-300"
+            >
+              {AUDIENCE_LABELS[aud]}
+            </span>
+          ))}
+          <span
+            className={cn(
+              'ml-auto inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition-all duration-200',
+              'group-hover:translate-x-0.5',
+              `group-hover:${accent.accentText.split(' ')[0]}`,
+              `dark:group-hover:${accent.accentText.split(' ')[1]}`
+            )}
+          >
+            Ouvrir
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" aria-hidden />
+          </span>
+        </div>
+      </Link>
+    </motion.div>
   );
 }

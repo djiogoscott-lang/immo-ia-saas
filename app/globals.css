@@ -2,17 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Variables et styles globaux Nestenn IA V2.
- * Toute personnalisation typographique ou de palette se fait via
- * tailwind.config.ts (theme.extend), pas en CSS arbitraire. */
+/* Variables et styles globaux.
+ * Personnalisation typographique via tailwind.config.ts (theme.extend),
+ * pas en CSS arbitraire. */
 
 :root {
   color-scheme: light dark;
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-geist-mono), 'SFMono-Regular', Menlo, Consolas, monospace;
 }
 
 html,
 body {
   height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
 }
 
 /* Wrap des messages markdown générés par les agents */

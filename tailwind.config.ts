@@ -16,8 +16,10 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
-      // Espace pour étendre la palette aux couleurs de la marque Nestenn
-      // si besoin (ex : couleurs primaires de l'identité graphique).
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
+      },
     },
   },
   plugins: [],

@@ -1,7 +1,10 @@
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Toaster } from 'sonner';
 
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { APP_NAME } from '@/lib/branding';
 import './globals.css';
 
@@ -37,21 +40,28 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body className="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50">
-        {children}
-        <Toaster
-          position="bottom-right"
-          richColors
-          closeButton
-          duration={3500}
-          toastOptions={{
-            classNames: {
-              toast:
-                'font-sans rounded-xl border shadow-md',
-            },
-          }}
-        />
+    <html
+      lang="fr"
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+    >
+      <body className="min-h-screen bg-white font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50">
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          {children}
+          <Toaster
+            position="bottom-right"
+            theme="system"
+            richColors
+            closeButton
+            duration={3500}
+            toastOptions={{
+              classNames: {
+                toast:
+                  'font-sans rounded-xl border shadow-md backdrop-blur-md',
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

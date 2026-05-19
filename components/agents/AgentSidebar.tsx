@@ -1,15 +1,16 @@
 'use client';
 
 /**
- * AgentSidebar — barre latérale de navigation listant les 12 agents Nestenn V2.
+ * AgentSidebar — navigation latérale (11 agents).
  *
- * - Consomme uniquement `AGENT_LIST` exporté par `lib/agents/registry.ts` (source unique).
- * - Groupe les agents par catégorie métier (production / communication / analyse / pilotage / formation).
- * - Met en évidence l'agent courant en se basant sur le pathname Next.js (`/agents/[agentId]`).
+ * Design : glassmorphism subtil, accent coloré par agent au survol/actif,
+ * affichage du prénom uniquement (le full name est dans le tooltip), gap
+ * de 0.5 entre items pour une densité confortable.
  *
- * Convention d'URL attendue :
- *   `/agents`              → page d'accueil (grille des agents)
- *   `/agents/[agentId]`    → chat actif avec l'agent sélectionné
+ * Sections : 5 catégories (Orchestration / Communication / Production /
+ * Analyse / Pilotage) dans cet ordre.
+ *
+ * Bas de sidebar : ThemeToggle + UserMenu (ou footer minimal en mode démo).
  */
 
 import Link from 'next/link';
@@ -35,6 +36,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { getAccentStyle } from '@/lib/agents/accent-styles';
 import {
   AGENT_LIST,
   type AgentAudience,
@@ -42,10 +46,10 @@ import {
   type AgentConfig,
 } from '@/lib/agents/registry';
 import { APP_NAME, APP_NAME_SHORT } from '@/lib/branding';
-import { UserMenu } from '@/components/auth/UserMenu';
+import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
-// Mapping nom d'icône (registry) → composant Lucide réel
+// Mappings
 // ---------------------------------------------------------------------------
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -75,7 +79,6 @@ const CATEGORY_LABELS: Record<AgentCategory, string> = {
   pilotage: 'Pilotage',
 };
 
-/** Ordre d'affichage des catégories dans la sidebar (top → bottom). */
 const CATEGORY_ORDER: readonly AgentCategory[] = [
   'orchestrateur',
   'communication',
@@ -107,48 +110,50 @@ export function AgentSidebar({
     ? pathname.split('/')[2] ?? null
     : null;
 
-  // Filtrage des agents selon le rôle métier :
-  // - un conseiller ne voit pas Ma Perf Immo, Réunion Immo, Train My Agent (audience manager)
-  // - un manager voit tout ce dont son audience fait partie
-  // - sans userRole, on montre tout (cas dégradé)
   const visibleAgents = userRole
     ? AGENT_LIST.filter((agent) => agent.audience.includes(userRole))
     : AGENT_LIST;
 
-  const grouped = CATEGORY_ORDER
-    .map((category) => ({
-      category,
-      label: CATEGORY_LABELS[category],
-      agents: visibleAgents.filter((agent) => agent.category === category),
-    }))
-    .filter((group) => group.agents.length > 0);
+  const grouped = CATEGORY_ORDER.map((category) => ({
+    category,
+    label: CATEGORY_LABELS[category],
+    agents: visibleAgents.filter((agent) => agent.category === category),
+  })).filter((group) => group.agents.length > 0);
 
   return (
     <aside
       aria-label={`Navigation des agents ${APP_NAME}`}
-      className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950"
+      className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200/60 bg-white/40 backdrop-blur-xl dark:border-zinc-800/40 dark:bg-zinc-950/40"
     >
       {/* Header : logo + nom */}
-      <div className="flex h-16 items-center border-b border-zinc-200 px-4 dark:border-zinc-800">
+      <div className="flex h-16 items-center border-b border-zinc-200/60 px-4 dark:border-zinc-800/40">
         <Link
           href="/agents"
-          className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-50"
+          className="flex items-center gap-2 font-semibold text-zinc-900 transition-opacity hover:opacity-80 dark:text-zinc-50"
         >
-          <span aria-hidden className="text-lg">
-            🏠
+          <span
+            aria-hidden
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-xs text-white shadow-sm shadow-indigo-500/20"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
           </span>
-          <span>{APP_NAME_SHORT}</span>
-          <span className="ml-1 rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300">
-            V2
-          </span>
+          <span className="text-sm tracking-tight">{APP_NAME_SHORT}</span>
         </Link>
       </div>
 
       {/* Lien Accueil (grille agents) */}
-      <div className="border-b border-zinc-200 px-2 py-3 dark:border-zinc-800">
-        <Link href="/agents" className={navLinkClass(currentAgentId === null)}>
-          <Home className="h-4 w-4 shrink-0" aria-hidden />
-          <span>Accueil</span>
+      <div className="border-b border-zinc-200/60 px-2 py-3 dark:border-zinc-800/40">
+        <Link
+          href="/agents"
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all',
+            currentAgentId === null
+              ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
+              : 'text-zinc-700 hover:bg-zinc-100/60 dark:text-zinc-300 dark:hover:bg-zinc-800/40'
+          )}
+        >
+          <Home className="h-4 w-4 shrink-0" aria-hidden strokeWidth={2} />
+          <span className="font-medium">Tous les agents</span>
         </Link>
       </div>
 
@@ -159,7 +164,7 @@ export function AgentSidebar({
       >
         {grouped.map((group) => (
           <div key={group.category} className="mb-5 last:mb-0">
-            <h3 className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <h3 className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
               {group.label}
             </h3>
             <ul className="space-y-0.5">
@@ -175,18 +180,26 @@ export function AgentSidebar({
         ))}
       </nav>
 
-      {/* Footer : profil user + bouton déconnexion */}
-      {userEmail && userRole ? (
-        <UserMenu
-          email={userEmail}
-          fullName={userFullName ?? null}
-          role={userRole}
-        />
-      ) : (
-        <div className="border-t border-zinc-200 px-4 py-3 text-[11px] text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
-          Multi-Agents · Start Academy
+      {/* Footer : theme toggle + UserMenu */}
+      <div className="border-t border-zinc-200/60 dark:border-zinc-800/40">
+        <div className="flex items-center justify-between px-3 py-2">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            Apparence
+          </span>
+          <ThemeToggle />
         </div>
-      )}
+        {userEmail && userRole ? (
+          <UserMenu
+            email={userEmail}
+            fullName={userFullName ?? null}
+            role={userRole}
+          />
+        ) : (
+          <div className="border-t border-zinc-200/60 px-4 py-3 text-[11px] text-zinc-400 dark:border-zinc-800/40 dark:text-zinc-500">
+            Multi-Agents · Start Academy
+          </div>
+        )}
+      </div>
     </aside>
   );
 }
@@ -201,36 +214,40 @@ interface AgentSidebarItemProps {
 }
 
 function AgentSidebarItem({ agent, active }: AgentSidebarItemProps) {
-  const Icon = ICON_MAP[agent.icon];
+  const Icon = ICON_MAP[agent.icon] ?? Sparkles;
+  const accent = getAccentStyle(agent.accent);
+
+  // Affiche uniquement le prénom dans la sidebar (sidebar étroite).
+  // Le nom complet "Sarah — Coordinatrice RDV Vendeur" est dans le tooltip.
+  const firstName = agent.name.split('—')[0]?.trim() ?? agent.name;
 
   return (
     <li>
       <Link
         href={`/agents/${agent.id}`}
         aria-current={active ? 'page' : undefined}
-        title={agent.tagline}
-        className={navLinkClass(active)}
-      >
-        {Icon ? (
-          <Icon className="h-4 w-4 shrink-0" aria-hidden />
-        ) : (
-          <span className="inline-block h-4 w-4 shrink-0" aria-hidden />
+        title={`${agent.name} — ${agent.tagline}`}
+        className={cn(
+          'group flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-all duration-200',
+          active
+            ? cn(
+                'bg-white/60 font-medium text-zinc-900 shadow-sm ring-1 dark:bg-zinc-900/60 dark:text-zinc-50',
+                accent.ringActive
+              )
+            : 'text-zinc-600 hover:bg-zinc-100/60 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/40 dark:hover:text-zinc-100'
         )}
-        <span className="truncate">{agent.name}</span>
+      >
+        <span
+          aria-hidden
+          className={cn(
+            'flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors',
+            active ? cn(accent.iconBg, accent.iconText) : 'text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300'
+          )}
+        >
+          <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+        </span>
+        <span className="truncate">{firstName}</span>
       </Link>
     </li>
   );
-}
-
-// ---------------------------------------------------------------------------
-// Helper de style partagé entre tous les liens de la sidebar
-// ---------------------------------------------------------------------------
-
-function navLinkClass(active: boolean): string {
-  const base =
-    'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors';
-  const state = active
-    ? 'bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900'
-    : 'text-zinc-700 hover:bg-zinc-200/70 dark:text-zinc-300 dark:hover:bg-zinc-800/70';
-  return `${base} ${state}`;
 }
