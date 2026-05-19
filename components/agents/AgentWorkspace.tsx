@@ -3,14 +3,13 @@
 /**
  * AgentWorkspace — espace de travail complet d'un agent sélectionné.
  *
- * Header global (icône + nom + tagline + catégorie) + barre de 4 onglets :
+ * Header global (icône + nom + tagline + catégorie) + barre de 3 onglets :
  *   1. Chat       — délégation au composant AgentChat (avec hideHeader)
  *   2. Analytics  — KPIs de l'agent (cartes)
- *   3. Fichiers   — drag & drop (RAG, à venir) + liste
- *   4. Historique — conversations passées avec cet agent
+ *   3. Historique — conversations passées avec cet agent
  *
- * État local `activeTab` pour basculer entre les onglets sans recharger
- * la page. Inspiré du layout Limova AI.
+ * Les fichiers (RAG) sont gérés globalement dans /agents/files (1 pool partagé
+ * entre tous les agents), pas par agent.
  */
 
 import {
@@ -31,7 +30,6 @@ import {
   Sparkles,
   Target,
   TrendingUp,
-  Upload,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -79,7 +77,7 @@ const CATEGORY_BADGES: Record<AgentCategory, string> = {
 // Tabs
 // ---------------------------------------------------------------------------
 
-type TabId = 'chat' | 'analytics' | 'files' | 'history';
+type TabId = 'chat' | 'analytics' | 'history';
 
 interface TabDef {
   id: TabId;
@@ -90,7 +88,6 @@ interface TabDef {
 const TABS: readonly TabDef[] = [
   { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'files', label: 'Fichiers', icon: FileText },
   { id: 'history', label: 'Historique', icon: History },
 ] as const;
 
@@ -187,16 +184,6 @@ export function AgentWorkspace({ agent }: AgentWorkspaceProps) {
           className="h-full overflow-y-auto"
         >
           {activeTab === 'analytics' && <AnalyticsTab agent={agent} />}
-        </div>
-
-        <div
-          role="tabpanel"
-          id="tabpanel-files"
-          aria-labelledby="tab-files"
-          hidden={activeTab !== 'files'}
-          className="h-full overflow-y-auto"
-        >
-          {activeTab === 'files' && <FilesTab agent={agent} />}
         </div>
 
         <div
@@ -323,125 +310,6 @@ function AnalyticsTab({ agent }: { agent: AgentConfig }) {
           <span>Il y a 12 jours</span>
           <span>Aujourd'hui</span>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Onglet Fichiers — drop zone + liste fictive
-// ---------------------------------------------------------------------------
-
-interface FakeFile {
-  name: string;
-  size: string;
-  date: string;
-}
-
-const FAKE_FILES: Record<string, FakeFile[]> = {
-  anais: [
-    { name: 'Modele_offre_2026.pdf', size: '224 Ko', date: 'Il y a 3 jours' },
-    { name: 'Conditions_suspensives_standard.docx', size: '48 Ko', date: 'Il y a 1 semaine' },
-  ],
-  julia: [
-    { name: 'Loi_Hoguet_consolidee.pdf', size: '1.2 Mo', date: 'Il y a 2 jours' },
-    { name: 'Loi_1965_copropriété.pdf', size: '880 Ko', date: 'Il y a 5 jours' },
-    { name: 'Bareme_honoraires_2026.pdf', size: '112 Ko', date: 'Il y a 12 jours' },
-  ],
-  elio: [
-    { name: 'RDV_vendeur_M_Dupont_25-03.pdf', size: '156 Ko', date: 'Il y a 2 jours' },
-  ],
-};
-
-function FilesTab({ agent }: { agent: AgentConfig }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const files = FAKE_FILES[agent.id] ?? [];
-
-  return (
-    <div className="mx-auto max-w-5xl px-6 py-8 lg:px-10">
-      <header className="mb-6">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-          Fichiers de {agent.name}
-        </h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Téléverse des documents pour enrichir le contexte de l'agent (RAG).
-          Le branchement Supabase Storage est en cours.
-        </p>
-      </header>
-
-      {/* Drop zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsDragging(false);
-          // TODO : brancher l'upload Supabase Storage ici
-        }}
-        className={[
-          'flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors',
-          isDragging
-            ? 'border-cyan-400 bg-cyan-50/80 dark:border-cyan-500 dark:bg-cyan-900/20'
-            : 'border-slate-200 bg-slate-50/60 dark:border-zinc-700 dark:bg-zinc-900/40',
-        ].join(' ')}
-      >
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-cyan-700 shadow-sm dark:bg-zinc-800 dark:text-cyan-300">
-          <Upload className="h-5 w-5" aria-hidden />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-            Glisse tes fichiers ici
-          </p>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            PDF, Word, Excel, images · max 10 Mo par fichier
-          </p>
-        </div>
-        <button
-          type="button"
-          disabled
-          className="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900"
-          title="Branchement Supabase Storage en cours"
-        >
-          Parcourir mes fichiers (bientôt)
-        </button>
-      </div>
-
-      {/* Liste de fichiers */}
-      <div className="mt-8">
-        <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          {files.length > 0
-            ? `${files.length} fichier${files.length > 1 ? 's' : ''} déjà associé${files.length > 1 ? 's' : ''}`
-            : 'Aucun fichier pour le moment'}
-        </h3>
-
-        {files.length > 0 && (
-          <ul className="space-y-2">
-            {files.map((file) => (
-              <li
-                key={file.name}
-                className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-              >
-                <span
-                  aria-hidden
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                >
-                  <FileText className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                    {file.name}
-                  </p>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                    {file.size} · {file.date}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

@@ -74,6 +74,8 @@ export const RATE_LIMITS = {
   router: { limit: 20, windowMs: 60_000 },
   /** Auth : 5 tentatives de login par 15 min par IP (brute-force protection). */
   auth: { limit: 5, windowMs: 15 * 60_000 },
+  /** Upload de fichiers : 10 uploads / 5 min par user (chaque upload = embeddings coûteux). */
+  upload: { limit: 10, windowMs: 5 * 60_000 },
 } as const;
 
 // ---------------------------------------------------------------------------

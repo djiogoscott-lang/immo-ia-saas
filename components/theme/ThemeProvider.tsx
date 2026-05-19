@@ -1,35 +1,25 @@
 'use client';
 
 /**
- * ThemeProvider — wrapper next-themes qui injecte la classe `dark` sur <html>.
+ * ThemeProvider — force la classe `dark` sur <html>.
  *
- * Configuration : dark forcé par défaut, mais l'utilisateur peut basculer
- * via <ThemeToggle>. La préférence est persistée dans localStorage.
+ * Choix produit : dark forcé partout, light mode désactivé. forcedTheme
+ * ignore localStorage et override toute préférence système.
  */
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import type { ComponentProps, ReactNode } from 'react';
-
-type NextThemesProps = ComponentProps<typeof NextThemesProvider>;
+import type { ReactNode } from 'react';
 
 interface ThemeProviderProps {
   children: ReactNode;
-  attribute?: NextThemesProps['attribute'];
-  defaultTheme?: string;
-  enableSystem?: boolean;
 }
 
-export function ThemeProvider({
-  children,
-  attribute = 'class',
-  defaultTheme = 'dark',
-  enableSystem = false,
-}: ThemeProviderProps) {
+export function ThemeProvider({ children }: ThemeProviderProps) {
   return (
     <NextThemesProvider
-      attribute={attribute}
-      defaultTheme={defaultTheme}
-      enableSystem={enableSystem}
+      attribute="class"
+      forcedTheme="dark"
+      enableSystem={false}
       disableTransitionOnChange
     >
       {children}

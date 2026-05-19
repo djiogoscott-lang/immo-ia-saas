@@ -10,7 +10,7 @@
  * Sections : 5 catégories (Orchestration / Communication / Production /
  * Analyse / Pilotage) dans cet ordre.
  *
- * Bas de sidebar : ThemeToggle + UserMenu (ou footer minimal en mode démo).
+ * Bas de sidebar : UserMenu (ou footer minimal en mode démo).
  */
 
 import Link from 'next/link';
@@ -23,6 +23,7 @@ import {
   DoorOpen,
   FileSignature,
   FileText,
+  FolderOpen,
   Home,
   Mailbox,
   Megaphone,
@@ -37,7 +38,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { getAccentStyle } from '@/lib/agents/accent-styles';
 import {
@@ -168,6 +168,18 @@ export function AgentSidebar({
           <BookMarked className="h-4 w-4 shrink-0" aria-hidden strokeWidth={2} />
           <span className="font-medium">Bibliothèque</span>
         </Link>
+        <Link
+          href="/agents/files"
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all',
+            pathname.startsWith('/agents/files')
+              ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
+              : 'text-zinc-700 hover:bg-zinc-100/60 dark:text-zinc-300 dark:hover:bg-zinc-800/40'
+          )}
+        >
+          <FolderOpen className="h-4 w-4 shrink-0" aria-hidden strokeWidth={2} />
+          <span className="font-medium">Mes fichiers</span>
+        </Link>
       </div>
 
       {/* Agents groupés par catégorie */}
@@ -193,14 +205,8 @@ export function AgentSidebar({
         ))}
       </nav>
 
-      {/* Footer : theme toggle + UserMenu */}
+      {/* Footer : UserMenu */}
       <div className="border-t border-zinc-200/60 dark:border-zinc-800/40">
-        <div className="flex items-center justify-between px-3 py-2">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-            Apparence
-          </span>
-          <ThemeToggle />
-        </div>
         {userEmail && userRole ? (
           <UserMenu
             email={userEmail}
@@ -208,7 +214,7 @@ export function AgentSidebar({
             role={userRole}
           />
         ) : (
-          <div className="border-t border-zinc-200/60 px-4 py-3 text-[11px] text-zinc-400 dark:border-zinc-800/40 dark:text-zinc-500">
+          <div className="px-4 py-3 text-[11px] text-zinc-400 dark:text-zinc-500">
             Multi-Agents · Start Academy
           </div>
         )}

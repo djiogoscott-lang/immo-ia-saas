@@ -25,6 +25,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { streamText, type CoreMessage } from 'ai';
 import { z } from 'zod';
 
+import { buildRagContext } from '@/lib/agents/rag-context';
 import { getAgent, isValidAgentId } from '@/lib/agents/registry';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { APP_NAME } from '@/lib/branding';
@@ -216,11 +217,28 @@ export async function POST(request: Request) {
     );
   }
 
+  // 7bis. RAG : injection du contexte fichiers dans le system prompt.
+  //       Skip en mode démo (pas de user.id, pas de fichiers indexés).
+  //       Robuste aux pannes : si Mistral down, le chat continue sans RAG.
+  let systemPrompt = agent.systemPrompt;
+  if (!isDemoMode && user) {
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
+    if (lastUserMsg) {
+      const rag = await buildRagContext(lastUserMsg.content, user.id);
+      if (rag.systemPromptAddon) {
+        systemPrompt = `${rag.systemPromptAddon}\n${agent.systemPrompt}`;
+        console.log(
+          `[/api/chat] RAG injected: ${rag.sources.length} sources for user ${user.id.slice(0, 8)}`
+        );
+      }
+    }
+  }
+
   // 8. Streaming
   try {
     const result = streamText({
       model: openrouter.chat(agent.model),
-      system: agent.systemPrompt,
+      system: systemPrompt,
       messages: messages as CoreMessage[],
       temperature: agent.temperature,
       onFinish: async ({ text, usage }) => {

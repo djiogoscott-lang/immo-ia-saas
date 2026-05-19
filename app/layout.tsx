@@ -43,14 +43,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`dark ${GeistSans.variable} ${GeistMono.variable}`}
     >
-      <body className="min-h-screen bg-white font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-50">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <body className="min-h-screen bg-zinc-950 font-sans text-zinc-50 antialiased">
+        <ThemeProvider>
           {children}
           <Toaster
             position="bottom-right"
-            theme="system"
+            theme="dark"
             richColors
             closeButton
             duration={3500}
