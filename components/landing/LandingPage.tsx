@@ -11,6 +11,7 @@ import Link from 'next/link';
 import {
   ArrowRight,
   BarChart3,
+  Calculator,
   ClipboardCheck,
   DoorOpen,
   FileSignature,
@@ -18,6 +19,8 @@ import {
   Mailbox,
   Megaphone,
   PenSquare,
+  Phone,
+  Users,
   Presentation,
   Scale,
   Sparkles,
@@ -34,26 +37,30 @@ import {
 import { APP_NAME } from '@/lib/branding';
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  FileText,
-  Mailbox,
-  Zap,
-  Presentation,
-  BarChart3,
-  TrendingUp,
+  Sparkles,
+  Phone,
   Megaphone,
   PenSquare,
-  FileSignature,
-  Scale,
   DoorOpen,
+  Calculator,
+  Scale,
+  Users,
+  Zap,
+  TrendingUp,
+  FileSignature,
+  FileText,
+  Mailbox,
+  Presentation,
+  BarChart3,
   ClipboardCheck,
 };
 
 const CATEGORY_GRADIENTS: Record<AgentCategory, string> = {
-  production: 'from-indigo-500 to-indigo-600',
+  orchestrateur: 'from-indigo-500 to-indigo-600',
+  production: 'from-emerald-500 to-emerald-600',
   communication: 'from-sky-500 to-sky-600',
-  analyse: 'from-cyan-500 to-cyan-600',
+  analyse: 'from-rose-500 to-rose-600',
   pilotage: 'from-violet-500 to-violet-600',
-  formation: 'from-amber-500 to-amber-600',
 };
 
 // ---------------------------------------------------------------------------

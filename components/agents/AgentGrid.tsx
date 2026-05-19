@@ -1,24 +1,19 @@
 /**
- * AgentGrid — vue d'accueil "/agents" affichant les 12 agents sous forme de
- * cartes groupées par catégorie. Server component (pas de hooks).
- *
- * Design premium :
- *   - bordures fines (border-slate-100) avec ombres subtiles
- *   - effet de survol moderne : translation vers le haut + ombre marquée
- *   - badge de catégorie coloré (chaque catégorie a sa propre couleur Tailwind)
- *   - icône de l'agent dans un bloc coloré assorti à la catégorie
+ * AgentGrid — vue d'accueil "/agents" affichant les agents sous forme de cartes.
+ * Server component (pas de hooks).
  *
  * Palette de catégories :
- *   production    → Indigo  (création de contenu prêt à l'emploi)
- *   communication → Sky     (relation parties prenantes)
- *   analyse       → Emerald (data & juridique)
- *   pilotage      → Violet  (management)
- *   formation     → Amber   (apprentissage)
+ *   orchestrateur → Indigo  (Charly, hub central)
+ *   production    → Emerald (livrables)
+ *   communication → Sky     (marketing, RS, SEO, téléphonie)
+ *   analyse       → Rose    (juridique, finance, DPE, data)
+ *   pilotage      → Violet  (management, RH, KPIs)
  */
 
 import Link from 'next/link';
 import {
   BarChart3,
+  Calculator,
   ClipboardCheck,
   DoorOpen,
   FileSignature,
@@ -26,9 +21,12 @@ import {
   Mailbox,
   Megaphone,
   PenSquare,
+  Phone,
   Presentation,
   Scale,
+  Sparkles,
   TrendingUp,
+  Users,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -44,38 +42,43 @@ import {
 // ---------------------------------------------------------------------------
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  FileText,
-  Mailbox,
-  Zap,
-  Presentation,
-  BarChart3,
-  TrendingUp,
+  Sparkles,
+  Phone,
   Megaphone,
   PenSquare,
-  FileSignature,
-  Scale,
   DoorOpen,
+  Calculator,
+  Scale,
+  Users,
+  Zap,
+  TrendingUp,
+  FileSignature,
+  FileText,
+  Mailbox,
+  Presentation,
+  BarChart3,
   ClipboardCheck,
 };
 
 const CATEGORY_LABELS: Record<AgentCategory, string> = {
+  orchestrateur: 'Orchestration',
   production: 'Production',
   communication: 'Communication',
   analyse: 'Analyse',
   pilotage: 'Pilotage',
-  formation: 'Formation',
 };
 
 const CATEGORY_DESCRIPTIONS: Record<AgentCategory, string> = {
+  orchestrateur:
+    "Le hub central : qualifie votre demande et la route vers l'expert le plus adapté.",
   production:
-    "Génération de contenu prêt à l'emploi : annonces, mails, flyers, tableaux.",
+    "Livrables prêts à l'emploi : prospection terrain, offre d'achat, kit RDV.",
   communication:
-    'Rédaction de messages aux parties prenantes (notaires, banques, clients).',
+    'Téléphonie, marketing & réseaux sociaux, SEO et rédaction web.',
   analyse:
-    'Analyse de données chiffrées et de textes juridiques pour décider.',
+    'Juridique, finances, DPE et études de marché chiffrées.',
   pilotage:
-    "Suivi de performance, animation d'équipe, plan d'action managérial.",
-  formation: 'Mise en situation et coaching pour progresser sur le terrain.',
+    "Recrutement, animation d'équipe, suivi de performance, KPIs.",
 };
 
 interface CategoryStyle {
@@ -93,13 +96,21 @@ interface CategoryStyle {
 }
 
 const CATEGORY_STYLES: Record<AgentCategory, CategoryStyle> = {
-  production: {
+  orchestrateur: {
     badgeText: 'text-indigo-700 dark:text-indigo-300',
     badgeBg: 'bg-indigo-50 dark:bg-indigo-900/30',
     iconBg: 'bg-indigo-50 dark:bg-indigo-900/30',
     iconText: 'text-indigo-600 dark:text-indigo-300',
     hoverBorder: 'hover:border-indigo-300 dark:hover:border-indigo-700',
     accentBar: 'bg-indigo-400',
+  },
+  production: {
+    badgeText: 'text-emerald-700 dark:text-emerald-300',
+    badgeBg: 'bg-emerald-50 dark:bg-emerald-900/30',
+    iconBg: 'bg-emerald-50 dark:bg-emerald-900/30',
+    iconText: 'text-emerald-600 dark:text-emerald-300',
+    hoverBorder: 'hover:border-emerald-300 dark:hover:border-emerald-700',
+    accentBar: 'bg-emerald-400',
   },
   communication: {
     badgeText: 'text-sky-700 dark:text-sky-300',
@@ -110,12 +121,12 @@ const CATEGORY_STYLES: Record<AgentCategory, CategoryStyle> = {
     accentBar: 'bg-sky-400',
   },
   analyse: {
-    badgeText: 'text-emerald-700 dark:text-emerald-300',
-    badgeBg: 'bg-emerald-50 dark:bg-emerald-900/30',
-    iconBg: 'bg-emerald-50 dark:bg-emerald-900/30',
-    iconText: 'text-emerald-600 dark:text-emerald-300',
-    hoverBorder: 'hover:border-emerald-300 dark:hover:border-emerald-700',
-    accentBar: 'bg-emerald-400',
+    badgeText: 'text-rose-700 dark:text-rose-300',
+    badgeBg: 'bg-rose-50 dark:bg-rose-900/30',
+    iconBg: 'bg-rose-50 dark:bg-rose-900/30',
+    iconText: 'text-rose-600 dark:text-rose-300',
+    hoverBorder: 'hover:border-rose-300 dark:hover:border-rose-700',
+    accentBar: 'bg-rose-400',
   },
   pilotage: {
     badgeText: 'text-violet-700 dark:text-violet-300',
@@ -125,22 +136,14 @@ const CATEGORY_STYLES: Record<AgentCategory, CategoryStyle> = {
     hoverBorder: 'hover:border-violet-300 dark:hover:border-violet-700',
     accentBar: 'bg-violet-400',
   },
-  formation: {
-    badgeText: 'text-amber-700 dark:text-amber-300',
-    badgeBg: 'bg-amber-50 dark:bg-amber-900/30',
-    iconBg: 'bg-amber-50 dark:bg-amber-900/30',
-    iconText: 'text-amber-600 dark:text-amber-300',
-    hoverBorder: 'hover:border-amber-300 dark:hover:border-amber-700',
-    accentBar: 'bg-amber-400',
-  },
 };
 
 const CATEGORY_ORDER: readonly AgentCategory[] = [
-  'production',
+  'orchestrateur',
   'communication',
+  'production',
   'analyse',
   'pilotage',
-  'formation',
 ] as const;
 
 const AUDIENCE_LABELS: Record<AgentConfig['audience'][number], string> = {

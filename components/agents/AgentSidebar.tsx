@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
+  Calculator,
   ClipboardCheck,
   DoorOpen,
   FileSignature,
@@ -24,9 +25,12 @@ import {
   Mailbox,
   Megaphone,
   PenSquare,
+  Phone,
   Presentation,
   Scale,
+  Sparkles,
   TrendingUp,
+  Users,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -45,35 +49,39 @@ import { UserMenu } from '@/components/auth/UserMenu';
 // ---------------------------------------------------------------------------
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  FileText,
-  Mailbox,
-  Zap,
-  Presentation,
-  BarChart3,
-  TrendingUp,
+  Sparkles,
+  Phone,
   Megaphone,
   PenSquare,
-  FileSignature,
-  Scale,
   DoorOpen,
+  Calculator,
+  Scale,
+  Users,
+  Zap,
+  TrendingUp,
+  FileSignature,
+  FileText,
+  Mailbox,
+  Presentation,
+  BarChart3,
   ClipboardCheck,
 };
 
 const CATEGORY_LABELS: Record<AgentCategory, string> = {
+  orchestrateur: 'Orchestration',
   production: 'Production',
   communication: 'Communication',
   analyse: 'Analyse',
   pilotage: 'Pilotage',
-  formation: 'Formation',
 };
 
 /** Ordre d'affichage des catégories dans la sidebar (top → bottom). */
 const CATEGORY_ORDER: readonly AgentCategory[] = [
-  'production',
+  'orchestrateur',
   'communication',
+  'production',
   'analyse',
   'pilotage',
-  'formation',
 ] as const;
 
 // ---------------------------------------------------------------------------

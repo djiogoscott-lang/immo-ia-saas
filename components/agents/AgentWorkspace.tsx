@@ -60,19 +60,19 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 const CATEGORY_LABELS: Record<AgentCategory, string> = {
+  orchestrateur: 'Orchestration',
   production: 'Production',
   communication: 'Communication',
   analyse: 'Analyse',
   pilotage: 'Pilotage',
-  formation: 'Formation',
 };
 
 const CATEGORY_BADGES: Record<AgentCategory, string> = {
-  production: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
+  orchestrateur: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
+  production: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   communication: 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
-  analyse: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+  analyse: 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
   pilotage: 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
-  formation: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
 };
 
 // ---------------------------------------------------------------------------
@@ -339,16 +339,16 @@ interface FakeFile {
 }
 
 const FAKE_FILES: Record<string, FakeFile[]> = {
-  'redac-offre': [
+  anais: [
     { name: 'Modele_offre_2026.pdf', size: '224 Ko', date: 'Il y a 3 jours' },
     { name: 'Conditions_suspensives_standard.docx', size: '48 Ko', date: 'Il y a 1 semaine' },
   ],
-  'my-juridic-assistant': [
+  julia: [
     { name: 'Loi_Hoguet_consolidee.pdf', size: '1.2 Mo', date: 'Il y a 2 jours' },
     { name: 'Loi_1965_copropriété.pdf', size: '880 Ko', date: 'Il y a 5 jours' },
     { name: 'Bareme_honoraires_2026.pdf', size: '112 Ko', date: 'Il y a 12 jours' },
   ],
-  'assist-immo': [
+  elio: [
     { name: 'RDV_vendeur_M_Dupont_25-03.pdf', size: '156 Ko', date: 'Il y a 2 jours' },
   ],
 };

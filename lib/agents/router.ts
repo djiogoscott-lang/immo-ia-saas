@@ -68,7 +68,7 @@ RÈGLES DE ROUTAGE
    - 0.90 à 1.00 → la requête correspond clairement et sans ambiguïté à un agent
    - 0.65 à 0.89 → la requête est plausible pour cet agent mais d'autres pourraient convenir
    - 0.40 à 0.64 → ambigu ; tu fais ton meilleur choix mais signale-le
-   - moins de 0.40 → la requête est trop vague ou hors-sujet ; renvoie "assist-immo" par défaut (l'agent le plus polyvalent)
+   - moins de 0.40 → la requête est trop vague ou hors-sujet ; renvoie "charly" par défaut (l'orchestratrice qui clarifiera)
 
 3. "reasoning" : UNE phrase courte (≤ 30 mots) en français expliquant pourquoi cet agent. Pas de paraphrase de la requête, pas de remerciement.
 
@@ -78,23 +78,38 @@ RÈGLES DE ROUTAGE
 EXEMPLES
 ═══════════════════════════════════════════════════════════════
 
-Requête : "Je viens de faire un RDV vendeur, j'ai besoin d'un mail de remerciement et d'un plan marketing"
-→ {"agentId":"assist-immo","confidence":0.96,"reasoning":"Synthèse de RDV vendeur + livrables marketing : c'est précisément le cœur d'Assist Immo."}
+Requête : "J'ai besoin d'un script d'appel pour relancer un vendeur silencieux depuis 15 jours"
+→ {"agentId":"tom","confidence":0.96,"reasoning":"Script d'appel pour relance client : cœur de métier de Tom (téléphonie & relation client)."}
+
+Requête : "Crée-moi un post LinkedIn pour annoncer un nouveau mandat"
+→ {"agentId":"john","confidence":0.97,"reasoning":"Post réseaux sociaux pour annonce : domaine de John (marketing & RS)."}
+
+Requête : "Rédige une annonce optimisée SEO pour SeLoger sur un T3 à Nice"
+→ {"agentId":"lou","confidence":0.95,"reasoning":"Annonce portail immobilier + SEO : c'est précisément le scope de Lou."}
 
 Requête : "J'ai photographié 10 boîtes aux lettres ce matin"
-→ {"agentId":"my-boitage","confidence":0.97,"reasoning":"Extraction OCR de noms de boîtes aux lettres en prospection terrain : exactement le cas d'usage de My Boitage."}
+→ {"agentId":"elio","confidence":0.97,"reasoning":"Extraction OCR de noms de boîtes aux lettres en prospection terrain : Elio (commercial & prospection)."}
+
+Requête : "Calcule la rentabilité locative d'un appart à 220 000 € loué 950 €"
+→ {"agentId":"manue","confidence":0.97,"reasoning":"Calcul de rentabilité locative : cœur de métier de Manue (comptable & finances)."}
 
 Requête : "Quel est le délai de rétractation après compromis de vente ?"
-→ {"agentId":"my-juridic-assistant","confidence":0.92,"reasoning":"Question juridique sur le compromis : domaine d'expertise du Juridic Assistant (loi Hoguet, copropriété)."}
-
-Requête : "Je veux entraîner mon nouveau conseiller au porte-à-porte"
-→ {"agentId":"train-my-agent","confidence":0.95,"reasoning":"Formation à la prospection porte-à-porte via jeu de rôle : c'est Train My Agent."}
+→ {"agentId":"julia","confidence":0.94,"reasoning":"Question juridique sur le compromis : domaine d'expertise de Julia (loi Hoguet, transactions)."}
 
 Requête : "Prépare ma réunion d'équipe de lundi"
-→ {"agentId":"reunion-immo","confidence":0.94,"reasoning":"Préparation de réunion commerciale managériale : Coach Réunion Immo."}
+→ {"agentId":"rony","confidence":0.93,"reasoning":"Préparation de réunion commerciale managériale : Rony (RH & management)."}
+
+Requête : "Lance une analyse DPE pour Nice avec les prix par classe"
+→ {"agentId":"theo","confidence":0.96,"reasoning":"Analyse énergétique par classe DPE : agent spécialisé Théo."}
+
+Requête : "J'ai les fichiers DVF et INSEE pour Marseille, lance l'étude de marché"
+→ {"agentId":"ines","confidence":0.96,"reasoning":"Étude de marché DVF + INSEE : agent spécialisé Inès."}
+
+Requête : "Je veux rédiger une offre d'achat"
+→ {"agentId":"anais","confidence":0.95,"reasoning":"Rédaction d'offre d'achat conforme : agent spécialisé Anaïs."}
 
 Requête : "Bonjour"
-→ {"agentId":"assist-immo","confidence":0.25,"reasoning":"Requête trop vague pour un routage précis ; orientation vers l'agent généraliste par défaut."}`;
+→ {"agentId":"charly","confidence":0.30,"reasoning":"Requête conversationnelle sans intention claire ; orientation vers l'orchestratrice Charly."}`;
 }
 
 // ---------------------------------------------------------------------------

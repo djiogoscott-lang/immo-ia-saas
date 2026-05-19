@@ -21,219 +21,176 @@ export interface QuickStartTemplate {
 }
 
 export const QUICK_START_TEMPLATES: Record<AgentId, QuickStartTemplate[]> = {
-  'assist-immo': [
+  // ==========================================================================
+  // Tier 1 — 8 personas Limova
+  // ==========================================================================
+
+  charly: [
     {
-      title: 'Synthèse de RDV vendeur',
-      prompt:
-        "Je sors d'un rendez-vous avec un vendeur. Voici les éléments à synthétiser : [vendeur, bien, motivation, points clés]. Génère-moi le résumé du RDV, le mail de remerciement et le post réseaux sociaux.",
+      title: "Découvrir l'équipe",
+      prompt: "Présente-moi rapidement les agents disponibles et ce que chacun sait faire.",
     },
     {
-      title: 'Plan marketing complet',
-      prompt:
-        "Crée un plan marketing détaillé pour ce bien que je vais te décrire : [type, surface, secteur, points forts]. Inclus annonce, courrier de prospection et stratégie réseaux sociaux.",
+      title: 'Trouver le bon expert',
+      prompt: "J'ai besoin d'aide pour [décris ton besoin] — vers quel agent dois-je me tourner ?",
     },
     {
-      title: 'Analyse documents vente',
-      prompt:
-        "Je vais te transmettre les documents du dossier de vente (diagnostics, charges, règlement de copropriété). Fais-moi un récapitulatif des points clés et identifie les anomalies éventuelles.",
+      title: 'Question généraliste',
+      prompt: "Comment fonctionne la plateforme et combien d'agents puis-je solliciter par jour ?",
     },
   ],
 
-  'my-boitage': [
+  tom: [
     {
-      title: 'Démarrer une tournée',
-      prompt:
-        "Je commence ma tournée de boîtage rue [nom de rue], [code postal] [ville]. Voici la première photo de boîte aux lettres, peux-tu extraire les noms ?",
+      title: 'Script de relance vendeur',
+      prompt: "Mon vendeur ne donne plus de nouvelles depuis 2 semaines après la signature du mandat. Rédige-moi un script d'appel pour le relancer sans paraître insistant.",
     },
     {
-      title: 'Tableau vierge à remplir',
-      prompt:
-        "Donne-moi un tableau vierge prêt à remplir pour ma tournée de boîtage du jour (colonnes nom, adresse, CP, ville, date, commentaires).",
+      title: 'SMS de confirmation RDV',
+      prompt: "Prépare-moi un SMS de confirmation de RDV vendeur pour demain 14h, court et chaleureux.",
     },
     {
-      title: 'Export Excel fin de tournée',
-      prompt:
-        "J'ai terminé ma tournée. Récapitule le tableau complet et prépare-le pour un export Excel.",
+      title: "Gérer l'objection « c'est trop cher »",
+      prompt: "L'acheteur me dit que mon mandat est trop cher par rapport à la concurrence. Donne-moi un plan de réponse structuré pour l'appel.",
     },
   ],
 
-  'my-dpe': [
+  john: [
     {
-      title: 'Analyse de marché DPE',
-      prompt:
-        "Je veux analyser l'impact du DPE sur le marché à [ville], pour des [appartements/maisons]. Je vais te donner le nombre d'annonces et le prix moyen au m² par classe DPE (A à G).",
+      title: 'Post LinkedIn nouveau mandat',
+      prompt: "Crée un post LinkedIn pour annoncer un nouveau mandat exclusif : appartement T3 lumineux à [secteur], 65m², 320 000 €. Ton pro, accroche forte, 3 hashtags pertinents.",
     },
     {
-      title: 'Argumentaire vendeur DPE F/G',
-      prompt:
-        "J'ai un vendeur avec un bien classé DPE F à [ville]. Crée-moi un argumentaire complet pour le sensibiliser à l'impact du DPE et lui proposer une stratégie de valorisation.",
+      title: 'Calendrier éditorial 1 mois',
+      prompt: "Propose-moi un calendrier éditorial sur 4 semaines pour mes réseaux sociaux : mix annonces, conseils, vie d'agence, témoignages. 3 posts par semaine.",
     },
     {
-      title: 'Courrier prospection passoires',
-      prompt:
-        "Génère un courrier de prospection ciblant les propriétaires de biens en classes E, F et G dans le secteur de [ville], avec des chiffres locaux.",
+      title: 'Story Instagram visite',
+      prompt: "Imagine-moi un script de story Instagram pour annoncer une visite groupée samedi prochain sur un T2 rénové. Ton fun, accrocheur, CTA clair.",
     },
   ],
 
-  'reunion-immo': [
+  lou: [
     {
-      title: 'Réunion hebdo complète',
-      prompt:
-        "Prépare ma réunion d'équipe de lundi. Voici notre tableau de suivi de la semaine : [colle ici]. Donne-moi ordre du jour, analyse, challenge, capsule coaching, compte-rendu et slides Gamma.",
+      title: 'Annonce optimisée SeLoger',
+      prompt: "Rédige une annonce optimisée SEO pour SeLoger : appartement T3 75m² au 3e étage avec balcon, secteur Nice Nord, proche commerces et tramway, 285 000 €. Titre 70 car max, description fluide, mots-clés long-tail.",
     },
     {
-      title: 'Focus mandats dormants',
-      prompt:
-        "Prépare une réunion axée sur les mandats en difficulté et propose des actions de relance concrètes pour mon équipe.",
+      title: 'Article blog quartier',
+      prompt: "Écris-moi un article de blog 'Guide quartier' (1000 mots) sur le secteur [nom du quartier] : ambiance, commerces, écoles, transports, prix moyens, profil acheteur-type.",
     },
     {
-      title: 'Génère les slides Gamma',
-      prompt:
-        "Génère uniquement les slides Gamma (format texte avec --- entre chaque slide) pour ma réunion sur le thème : [thème].",
+      title: 'Méta-données page agence',
+      prompt: "Mon agence couvre la vente et la gestion locative à [ville]. Génère titre SEO + meta-description (155 car) + URL slug pour la page d'accueil.",
     },
   ],
 
-  'ma-perf-immo': [
+  elio: [
     {
-      title: 'Ajouter une fiche collaborateur',
-      prompt:
-        "Je veux ajouter les performances de [prénom], conseiller, pour la semaine du [date]. Pose-moi les questions dans l'ordre.",
+      title: 'Démarrer une tournée de boitage',
+      prompt: "Je commence ma tournée rue [nom de rue], [code postal] [ville]. Voici la première photo de boîte aux lettres, extrais les noms et démarre le tableau.",
     },
     {
-      title: 'Bilan + plan d\'action',
-      prompt:
-        "Pour [prénom], génère le bilan complet de la période, identifie son profil (vendeur/acheteur/équilibré) et propose un plan d'action personnalisé.",
+      title: 'Simulation porte-à-porte',
+      prompt: "Lance une simulation où tu incarnes un propriétaire qui envisage vaguement de vendre mais reste méfiant. Je travaille ma prise d'information.",
     },
     {
-      title: 'Mail d\'alerte bienveillant',
-      prompt:
-        "Rédige un mail d'alerte bienveillant à [prénom] dont les ratios ne sont pas atteints ce mois-ci, avec des suggestions concrètes de recalibrage.",
+      title: 'Protocole RDV vendeur',
+      prompt: "Je sors d'un RDV vendeur, démarre le Protocole Rendez-vous Vendeur pour structurer mon compte-rendu et générer les livrables.",
     },
   ],
 
-  'immo-predictor': [
+  manue: [
     {
-      title: 'Lancer une étude de marché',
-      prompt:
-        "Je veux lancer une étude de marché complète sur [ville/secteur]. Je vais te transmettre les fichiers DVF et INSEE. Guide-moi étape par étape.",
+      title: 'Rentabilité locative',
+      prompt: "Calcule la rentabilité brute et nette d'un appartement à 220 000 € (frais notaire inclus), loué 950 €/mois, charges récupérables 80 €, taxe foncière 1 100 €/an, assurance PNO 180 €/an. Je suis en régime réel.",
     },
     {
-      title: 'Analyse DPE par typologie',
-      prompt:
-        "À partir de mes données DVF, analyse les prix au m² par typologie (T2/T3/T4) et donne-moi la projection 2025 (outliers ±10 % exclus).",
+      title: 'Simulation emprunt',
+      prompt: "Mon acheteur a 4 200 € de revenus mensuels nets et veut emprunter 280 000 € sur 25 ans à 3,9 %. Vérifie sa capacité d'emprunt et donne-moi le tableau d'amortissement résumé.",
     },
     {
-      title: 'Plan d\'action stratégique',
-      prompt:
-        "Génère uniquement la partie 'Coaching & Recommandations Stratégiques' : justification de prix, techniques de closing, stratégies marketing et plan d'action.",
+      title: 'LMNP vs réel foncier',
+      prompt: "Mon client hésite entre louer en meublé (LMNP) ou nu (revenus fonciers). Studio 200 000 €, loyer 700 €. Compare brièvement les deux régimes fiscaux.",
     },
   ],
 
-  'post-rdv-vendeur': [
+  julia: [
     {
-      title: 'Kit complet post-RDV',
-      prompt:
-        "Je sors d'un RDV vendeur. Voici les données : [nom, type de bien, secteur, surface, atouts, motif, urgence, prix]. Génère le mail de remerciement, le SMS interne, le post teaser, le flyer long et l'annonce.",
+      title: 'Délai rétractation compromis',
+      prompt: "Quel est le délai légal de rétractation après signature d'un compromis de vente, et à partir de quel moment court-il exactement ?",
     },
     {
-      title: 'Flyer prospection quartier',
-      prompt:
-        "Génère uniquement le flyer de prospection (version développée) pour annoncer ce nouveau bien dans le quartier : [type, surface, secteur, atouts].",
+      title: 'Obligations mandat exclusif',
+      prompt: "Quelles sont les mentions obligatoires d'un mandat exclusif selon la loi Hoguet ? Cite les articles de référence.",
     },
     {
-      title: 'SMS interne équipe',
-      prompt:
-        "Rédige le SMS court à envoyer à l'équipe interne pour les informer du nouveau bien : [type, secteur, prochaine étape].",
+      title: 'Tantièmes copropriété',
+      prompt: "Un copropriétaire conteste son décompte de tantièmes pour des travaux votés en AG. Quelles sont ses voies de recours selon la loi de 1965 ?",
     },
   ],
 
-  'redac-offre': [
+  rony: [
     {
-      title: 'Nouvelle offre d\'achat',
-      prompt:
-        "Je veux rédiger une nouvelle offre d'achat. Pose-moi les questions une par une pour collecter toutes les informations nécessaires.",
+      title: 'Annonce de recrutement',
+      prompt: "Rédige une annonce LinkedIn pour recruter un conseiller immobilier expérimenté en agence à [ville]. Statut indépendant, secteur premium, équipe de 6.",
+    },
+    {
+      title: "Ordre du jour réunion hebdo",
+      prompt: "Prépare-moi un ordre du jour structuré pour ma réunion hebdo de lundi matin, équipe de 5 conseillers. Inclus tour de table, chiffres semaine, challenge et capsule coaching.",
+    },
+    {
+      title: 'Bilan KPI conseiller',
+      prompt: "Voici les chiffres d'un conseiller sur le mois : 8 estimations, 3 MS, 1 ME, 12 acheteurs en découverte, 18 visites, 4 offres, 1 compromis, 0 baisse de prix. Donne-moi un bilan + plan d'action.",
+    },
+  ],
+
+  // ==========================================================================
+  // Tier 2 — 3 agents spécialisés
+  // ==========================================================================
+
+  theo: [
+    {
+      title: 'Analyse DPE complète',
+      prompt: "Lance une analyse complète sur Nice (appartements). Voici les données par classe DPE : [A: 12 annonces à 5 800 €/m², B: 28 à 5 400 €/m², C: 95 à 4 900 €/m², D: 142 à 4 500 €/m², E: 110 à 4 100 €/m², F: 65 à 3 700 €/m², G: 32 à 3 300 €/m²].",
+    },
+    {
+      title: 'Courrier propriétaires F/G',
+      prompt: "Une fois l'analyse faite, génère-moi le courrier de prospection ciblant les propriétaires de biens DPE F et G dans le secteur.",
+    },
+    {
+      title: 'ROI rénovation F vers C',
+      prompt: "Simule le ROI d'une rénovation énergétique faisant passer un bien de DPE F à DPE C : coût travaux estimé, gain valeur, aides disponibles (MaPrimeRénov', CEE).",
+    },
+  ],
+
+  ines: [
+    {
+      title: 'Étude de marché complète',
+      prompt: "Je te transmets les fichiers DVF et INSEE pour [commune]. Vérifie leur validité puis lance l'étape 3.1 (Analyse DVF classique).",
+    },
+    {
+      title: 'Top 10 adresses dynamiques',
+      prompt: "À partir du fichier DVF déjà chargé, identifie les Top 10 adresses les plus dynamiques en transactions sur les 24 derniers mois.",
+    },
+    {
+      title: 'Rapport final canvas',
+      prompt: "Génère le rapport final ultra-détaillé en format canvas (étape 4) avec tableaux, graphiques, plan d'action.",
+    },
+  ],
+
+  anais: [
+    {
+      title: 'Nouvelle offre achat',
+      prompt: "Je veux rédiger une nouvelle offre d'achat. Pose-moi les questions une par une pour collecter toutes les informations nécessaires.",
     },
     {
       title: 'Mail urgent vendeur',
-      prompt:
-        "Génère uniquement le mail urgent au vendeur (sans mentionner explicitement l'offre) pour organiser un RDV rapide : [adresse du bien, nom du vendeur].",
+      prompt: "L'offre est rédigée. Génère maintenant le mail discret/urgent au vendeur pour caler un RDV sous 24h.",
     },
     {
       title: 'Mail confirmation acheteur',
-      prompt:
-        "Génère uniquement le mail à l'acheteur confirmant la transmission de son offre, avec les 3 scénarios possibles expliqués pédagogiquement.",
-    },
-  ],
-
-  'assistant-compromis': [
-    {
-      title: 'Relance notaire',
-      prompt:
-        "Rédige un email professionnel au notaire pour relancer le projet d'acte du dossier [nom du bien / adresse], compromis signé le [date].",
-    },
-    {
-      title: 'Préparer l\'acheteur',
-      prompt:
-        "Mon acheteur est primo-accédant. Prépare-lui un message clair expliquant les étapes entre le compromis et l'acte authentique, sans jargon juridique.",
-    },
-    {
-      title: 'Demander un diagnostic',
-      prompt:
-        "Rédige un email + un SMS court pour demander un devis et organiser un RDV avec un diagnostiqueur pour [type de bien] situé [adresse].",
-    },
-  ],
-
-  'my-juridic-assistant': [
-    {
-      title: 'Question loi Hoguet',
-      prompt:
-        "Quelles sont les obligations d'affichage d'un agent immobilier titulaire de la carte T selon la loi Hoguet ? Cite les articles précis.",
-    },
-    {
-      title: 'Copropriété — AG',
-      prompt:
-        "Un copropriétaire conteste une décision d'AG votée à la majorité simple. Quelles sont les conditions et délais pour contester selon la loi de 1965 ?",
-    },
-    {
-      title: 'Délai de rétractation',
-      prompt:
-        "Explique-moi le délai de rétractation SRU après signature d'un compromis : durée, point de départ, formalisme requis, articles applicables.",
-    },
-  ],
-
-  'train-my-agent': [
-    {
-      title: 'Démarrer une simulation',
-      prompt:
-        "Je veux m'entraîner à la prospection porte-à-porte. Lance la simulation : je frappe à ta porte.",
-    },
-    {
-      title: 'Simulation prospect difficile',
-      prompt:
-        "Lance une simulation où tu incarnes un prospect agressif et pressé qui n'a aucune intention de vendre. Je m'entraîne à gérer les objections.",
-    },
-    {
-      title: 'Simulation vendeur potentiel',
-      prompt:
-        "Lance une simulation où tu incarnes un propriétaire qui envisage vaguement de vendre mais reste méfiant. Je veux travailler ma prise d'information.",
-    },
-  ],
-
-  'assistant-immo-vendeur': [
-    {
-      title: 'Lancer le protocole RDV vendeur',
-      prompt:
-        "Lance le Protocole Rendez-vous Vendeur. Je vais répondre aux questions une par une pour structurer mon compte-rendu.",
-    },
-    {
-      title: 'Reprendre un protocole en cours',
-      prompt:
-        "Je veux reprendre le protocole en cours pour le vendeur [prénom nom]. Voici les infos déjà collectées : [résumé].",
-    },
-    {
-      title: 'Générer livrables finaux',
-      prompt:
-        "Le protocole est terminé pour [nom du vendeur]. Génère le compte-rendu, le texte publicitaire, le post réseaux sociaux, le mail de remerciement et le courrier quartier.",
+      prompt: "Génère le mail pédagogique de confirmation à l'acheteur, expliquant les 3 scénarios possibles après transmission de l'offre.",
     },
   ],
 };

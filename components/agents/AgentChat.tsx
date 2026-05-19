@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   BarChart3,
+  Calculator,
   Check,
   ClipboardCheck,
   Copy,
@@ -26,11 +27,14 @@ import {
   Mailbox,
   Megaphone,
   PenSquare,
+  Phone,
   Presentation,
   RefreshCw,
   Scale,
   Send,
+  Sparkles,
   TrendingUp,
+  Users,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -40,17 +44,21 @@ import { QuickStartTemplates } from '@/components/agents/QuickStartTemplates';
 import type { AgentConfig } from '@/lib/agents/registry';
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  FileText,
-  Mailbox,
-  Zap,
-  Presentation,
-  BarChart3,
-  TrendingUp,
+  Sparkles,
+  Phone,
   Megaphone,
   PenSquare,
-  FileSignature,
-  Scale,
   DoorOpen,
+  Calculator,
+  Scale,
+  Users,
+  Zap,
+  TrendingUp,
+  FileSignature,
+  FileText,
+  Mailbox,
+  Presentation,
+  BarChart3,
   ClipboardCheck,
 };
 
