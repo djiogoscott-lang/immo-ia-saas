@@ -72,7 +72,7 @@ function getOpenRouterClient() {
     apiKey,
     headers: {
       'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-      'X-Title': 'Nestenn IA — Multi-Agents',
+      'X-Title': 'Nestenn IA - Multi-Agents',
     },
   });
 }

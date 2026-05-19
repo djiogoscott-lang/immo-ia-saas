@@ -117,7 +117,7 @@ export async function routeQuery(text: string): Promise<RoutingResult> {
     apiKey,
     headers: {
       'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-      'X-Title': 'Nestenn IA — Router',
+      'X-Title': 'Nestenn IA - Router',
     },
   });
 
