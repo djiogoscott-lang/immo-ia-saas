@@ -13,6 +13,7 @@ import { headers } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { APP_NAME } from '@/lib/branding';
 
 interface SignupPageProps {
   searchParams: { error?: string; success?: string };
@@ -86,7 +87,7 @@ export default function SignupPage({ searchParams }: SignupPageProps) {
     <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
       <header className="mb-6 text-center">
         <p className="mb-1 text-xs font-medium uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
-          Nestenn IA
+          {APP_NAME}
         </p>
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           Créer un compte

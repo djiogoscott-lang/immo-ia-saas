@@ -27,6 +27,7 @@ import { z } from 'zod';
 
 import { getAgent, isValidAgentId } from '@/lib/agents/registry';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { APP_NAME } from '@/lib/branding';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import {
   addMessage,
@@ -72,7 +73,7 @@ function getOpenRouterClient() {
     apiKey,
     headers: {
       'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-      'X-Title': 'Nestenn IA - Multi-Agents',
+      'X-Title': `${APP_NAME} - Multi-Agents`,
     },
   });
 }

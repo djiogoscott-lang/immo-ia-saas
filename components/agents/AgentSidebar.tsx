@@ -37,6 +37,7 @@ import {
   type AgentCategory,
   type AgentConfig,
 } from '@/lib/agents/registry';
+import { APP_NAME, APP_NAME_SHORT } from '@/lib/branding';
 import { UserMenu } from '@/components/auth/UserMenu';
 
 // ---------------------------------------------------------------------------
@@ -116,7 +117,7 @@ export function AgentSidebar({
 
   return (
     <aside
-      aria-label="Navigation des agents Nestenn"
+      aria-label={`Navigation des agents ${APP_NAME}`}
       className="flex h-screen w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950"
     >
       {/* Header : logo + nom */}
@@ -128,7 +129,7 @@ export function AgentSidebar({
           <span aria-hidden className="text-lg">
             🏠
           </span>
-          <span>Nestenn</span>
+          <span>{APP_NAME_SHORT}</span>
           <span className="ml-1 rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300">
             V2
           </span>

@@ -11,6 +11,7 @@
 
 import { AgentGrid } from '@/components/agents/AgentGrid';
 import { AgentRouterInput } from '@/components/agents/AgentRouterInput';
+import { APP_NAME } from '@/lib/branding';
 
 export default function AgentsHomePage() {
   return (
@@ -21,7 +22,7 @@ export default function AgentsHomePage() {
           Plateforme multi-agents
         </p>
         <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-4xl">
-          Bienvenue sur Nestenn IA
+          Bienvenue sur {APP_NAME}
         </h1>
         <p className="mt-3 max-w-2xl text-base text-zinc-600 dark:text-zinc-400">
           Décris ton besoin dans la barre ci-dessous — l'orchestrateur choisira
@@ -39,7 +40,7 @@ export default function AgentsHomePage() {
 
       {/* Footer informatif */}
       <footer className="mt-16 border-t border-zinc-200 pt-6 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-500">
-        12 agents disponibles · propulsés par Claude 3.5 Sonnet via OpenRouter
+        12 agents disponibles · propulsés par Claude Sonnet 4.6, Haiku 4.5 et Mistral Large via OpenRouter
       </footer>
     </div>
   );

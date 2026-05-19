@@ -31,6 +31,7 @@ import {
   type AgentCategory,
   type AgentConfig,
 } from '@/lib/agents/registry';
+import { APP_NAME } from '@/lib/branding';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   FileText,
@@ -83,7 +84,7 @@ function TopNav() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-10">
         <Link href="/" className="flex items-center gap-2">
           <span aria-hidden className="text-xl">🏠</span>
-          <span className="text-base font-semibold">Nestenn IA</span>
+          <span className="text-base font-semibold">{APP_NAME}</span>
           <span className="rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300">
             V2
           </span>
@@ -136,7 +137,7 @@ function Hero() {
           </h1>
 
           <p className="mt-6 text-lg leading-relaxed text-zinc-600 dark:text-zinc-300">
-            12 agents conçus pour les conseillers, managers et assistants Nestenn.
+            12 agents conçus pour les conseillers, managers et assistants immobiliers.
             De la prospection terrain aux questions juridiques, de l'analyse de
             marché aux comptes-rendus de RDV : gagnez du temps sans sacrifier la
             qualité.
@@ -356,7 +357,7 @@ function Footer() {
           <span aria-hidden>🏠</span>
           <span>
             <strong className="font-semibold text-zinc-700 dark:text-zinc-300">
-              Nestenn IA
+              {APP_NAME}
             </strong>{' '}
             · propulsé par Start Academy
           </span>

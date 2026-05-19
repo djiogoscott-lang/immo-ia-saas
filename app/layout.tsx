@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Toaster } from 'sonner';
 
+import { APP_NAME } from '@/lib/branding';
 import './globals.css';
 
 /**
@@ -14,17 +15,16 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Nestenn IA',
-    template: '%s · Nestenn IA',
+    default: APP_NAME,
+    template: `%s · ${APP_NAME}`,
   },
   description:
     "Plateforme multi-agents IA pour conseillers, managers et assistantes en agence immobilière. 12 agents spécialisés (synthèse RDV, prospection, juridique, KPIs…).",
-  applicationName: 'Nestenn IA',
+  applicationName: APP_NAME,
   keywords: [
     'immobilier',
     'IA',
     'agents',
-    'Nestenn',
     'conseiller',
     'prospection',
     'juridique',

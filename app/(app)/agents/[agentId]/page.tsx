@@ -16,6 +16,7 @@ import { notFound } from 'next/navigation';
 
 import { AgentWorkspace } from '@/components/agents/AgentWorkspace';
 import { getAgent, isValidAgentId } from '@/lib/agents/registry';
+import { APP_NAME, APP_NAME_SHORT } from '@/lib/branding';
 
 interface AgentChatPageProps {
   params: { agentId: string };
@@ -24,11 +25,11 @@ interface AgentChatPageProps {
 // Métadonnées dynamiques par agent (titre d'onglet).
 export async function generateMetadata({ params }: AgentChatPageProps) {
   if (!isValidAgentId(params.agentId)) {
-    return { title: 'Agent introuvable — Nestenn' };
+    return { title: `Agent introuvable — ${APP_NAME_SHORT}` };
   }
   const agent = getAgent(params.agentId);
   return {
-    title: `${agent.name} — Nestenn`,
+    title: `${agent.name} — ${APP_NAME}`,
     description: agent.tagline,
   };
 }

@@ -20,6 +20,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
+import { APP_NAME } from '@/lib/branding';
 import { AGENT_IDS, AGENT_LIST, type AgentId } from './registry';
 
 // Modèle du router. Modifier ici si tu veux switcher (Mistral, Sonnet, etc.).
@@ -49,7 +50,7 @@ function buildRouterSystemPrompt(): string {
    Mots-clés : ${agent.routerKeywords.join(', ')}`
   ).join('\n\n');
 
-  return `Tu es l'orchestrateur de Nestenn IA. Ton rôle UNIQUE est de lire la requête en langage naturel d'un utilisateur immobilier (conseiller, manager ou assistante) et de choisir l'agent spécialisé le plus adapté pour y répondre.
+  return `Tu es l'orchestrateur de ${APP_NAME}. Ton rôle UNIQUE est de lire la requête en langage naturel d'un utilisateur immobilier (conseiller, manager ou assistante) et de choisir l'agent spécialisé le plus adapté pour y répondre.
 
 ═══════════════════════════════════════════════════════════════
 AGENTS DISPONIBLES (12)
@@ -117,7 +118,7 @@ export async function routeQuery(text: string): Promise<RoutingResult> {
     apiKey,
     headers: {
       'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-      'X-Title': 'Nestenn IA - Router',
+      'X-Title': `${APP_NAME} - Router`,
     },
   });
 
