@@ -23,7 +23,7 @@ import { z } from 'zod';
 import { AGENT_IDS, AGENT_LIST, type AgentId } from './registry';
 
 // Modèle du router. Modifier ici si tu veux switcher (Mistral, Sonnet, etc.).
-const ROUTER_MODEL = 'anthropic/claude-3.5-haiku' as const;
+const ROUTER_MODEL = 'mistralai/mistral-large-2411' as const;
 
 // ---------------------------------------------------------------------------
 // Schéma de validation de la sortie du LLM

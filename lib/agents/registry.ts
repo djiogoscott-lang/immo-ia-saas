@@ -41,12 +41,11 @@ export type AgentAudience = 'conseiller' | 'manager' | 'assistante';
 
 /**
  * Identifiants de modèles tels qu'attendus par l'API OpenRouter.
- * Tous les agents pointent sur Claude 3.5 Sonnet en V2.0.
- * À diversifier vers Mistral plus tard pour les agents simples (boitage, post-rdv).
  */
 export type AgentModel =
-  | 'anthropic/claude-3.5-sonnet'
-  | 'mistralai/mistral-large-latest';
+  | 'anthropic/claude-sonnet-4.6'
+  | 'anthropic/claude-haiku-4.5'
+  | 'mistralai/mistral-large-2411';
 
 export type AgentCategory =
   | 'production'      // génération de contenu (mails, flyers, annonces)
@@ -586,7 +585,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'FileText',
     audience: ['conseiller'],
     category: 'production',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'mistralai/mistral-large-2411',
     temperature: 0.7,
     systemPrompt: SYSTEM_PROMPT_ASSIST_IMMO,
     routerKeywords: [
@@ -605,7 +604,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'Mailbox',
     audience: ['conseiller'],
     category: 'production',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.2,
     systemPrompt: SYSTEM_PROMPT_MY_BOITAGE,
     routerKeywords: [
@@ -623,7 +622,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'Zap',
     audience: ['conseiller'],
     category: 'analyse',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.4,
     systemPrompt: SYSTEM_PROMPT_MY_DPE,
     routerKeywords: [
@@ -642,7 +641,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'Presentation',
     audience: ['manager'],
     category: 'pilotage',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-haiku-4.5',
     temperature: 0.6,
     systemPrompt: SYSTEM_PROMPT_REUNION_IMMO,
     routerKeywords: [
@@ -661,7 +660,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'BarChart3',
     audience: ['manager'],
     category: 'pilotage',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.5,
     systemPrompt: SYSTEM_PROMPT_MA_PERF_IMMO,
     routerKeywords: [
@@ -680,7 +679,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'TrendingUp',
     audience: ['manager', 'conseiller'],
     category: 'analyse',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.3,
     systemPrompt: SYSTEM_PROMPT_IMMO_PREDICTOR,
     routerKeywords: [
@@ -699,7 +698,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'Megaphone',
     audience: ['conseiller'],
     category: 'communication',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'mistralai/mistral-large-2411',
     temperature: 0.7,
     systemPrompt: SYSTEM_PROMPT_POST_RDV_VENDEUR,
     routerKeywords: [
@@ -717,7 +716,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'PenSquare',
     audience: ['conseiller', 'assistante', 'manager'],
     category: 'production',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.3,
     systemPrompt: SYSTEM_PROMPT_REDAC_OFFRE,
     routerKeywords: [
@@ -735,7 +734,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'FileSignature',
     audience: ['conseiller', 'manager', 'assistante'],
     category: 'communication',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.5,
     systemPrompt: SYSTEM_PROMPT_ASSISTANT_COMPROMIS,
     routerKeywords: [
@@ -754,7 +753,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'Scale',
     audience: ['conseiller', 'manager', 'assistante'],
     category: 'analyse',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.6',
     temperature: 0.2,
     systemPrompt: SYSTEM_PROMPT_MY_JURIDIC_ASSISTANT,
     routerKeywords: [
@@ -773,7 +772,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'DoorOpen',
     audience: ['manager'],
     category: 'formation',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-haiku-4.5',
     temperature: 0.9,
     systemPrompt: SYSTEM_PROMPT_TRAIN_MY_AGENT,
     routerKeywords: [
@@ -791,7 +790,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     icon: 'ClipboardCheck',
     audience: ['conseiller'],
     category: 'production',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'mistralai/mistral-large-2411',
     temperature: 0.4,
     systemPrompt: SYSTEM_PROMPT_ASSISTANT_IMMO_VENDEUR,
     routerKeywords: [

@@ -248,6 +248,13 @@ export async function POST(request: Request) {
     return result.toDataStreamResponse({
       sendUsage: true,
       headers: responseHeaders,
+      getErrorMessage: (error) => {
+        console.error('[/api/chat] stream error:', error);
+        if (error == null) return 'Erreur inconnue';
+        if (typeof error === 'string') return error;
+        if (error instanceof Error) return error.message;
+        try { return JSON.stringify(error); } catch { return 'Erreur non sérialisable'; }
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';
