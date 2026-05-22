@@ -20,7 +20,24 @@ const nextConfig = {
     serverComponentsExternalPackages: [
       '@openrouter/ai-sdk-provider',
       'ai',
+      // OCR pipeline : ces packages contiennent des binaires natifs (.node)
+      // que Webpack ne sait pas bundler. Les marquer external les laisse
+      // chargés via require() au runtime Node.
+      'pdf-to-png-converter',
+      '@napi-rs/canvas',
+      'pdf-parse',
     ],
+
+    // Sur Vercel (build serverless lambda), on doit explicitement inclure les
+    // binaires natifs Linux x64 dans le bundle de la lambda /api/agent-files/upload
+    // sinon ils sont elagues a la trace.
+    outputFileTracingIncludes: {
+      '/api/agent-files/upload': [
+        './node_modules/@napi-rs/canvas-linux-x64-gnu/**',
+        './node_modules/@napi-rs/canvas-linux-x64-musl/**',
+        './node_modules/pdf-to-png-converter/**',
+      ],
+    },
   },
 };
 

@@ -81,12 +81,46 @@ interface AgentChatProps {
 export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   const Icon = ICON_MAP[agent.icon];
 
-  // ID de la conversation Supabase. Initialement null (créé par /api/chat au
-  // 1er message), récupéré via le header X-Conversation-Id de la réponse.
-  // Permet à <ConversationFiles> de scoper les uploads à cette conversation.
+  // ID de la conversation Supabase. Initialement null (créé soit par /api/chat
+  // au 1er message via le header X-Conversation-Id, soit à la volée via
+  // ensureConversation() quand l'utilisateur veut upload avant le 1er message).
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isCreatingConv, setIsCreatingConv] = useState(false);
   const filesHandleRef = useRef<ConversationFilesHandle | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+
+  // Crée la conversation à la demande (avant le 1er message) pour permettre
+  // l'upload immédiat. Si la conv existe déjà, retourne son ID directement.
+  // Retourne null si la création échoue (mode démo, RLS, etc.).
+  const ensureConversation = async (): Promise<string | null> => {
+    if (conversationId) return conversationId;
+    if (isCreatingConv) return null; // évite les doubles appels concurrents
+
+    setIsCreatingConv(true);
+    try {
+      const res = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: agent.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error('Impossible de creer la conversation', {
+          description: data.message ?? `HTTP ${res.status}`,
+        });
+        return null;
+      }
+      setConversationId(data.id);
+      return data.id as string;
+    } catch (err) {
+      toast.error('Erreur reseau lors de la creation', {
+        description: err instanceof Error ? err.message : 'Erreur inconnue',
+      });
+      return null;
+    } finally {
+      setIsCreatingConv(false);
+    }
+  };
 
   const {
     messages,
@@ -127,12 +161,14 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   const handleDragLeave = (e: React.DragEvent) => {
     if (e.currentTarget === e.target) setIsDragOver(false);
   };
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    if (e.dataTransfer.files.length > 0) {
-      filesHandleRef.current?.uploadFiles(e.dataTransfer.files);
-    }
+    if (e.dataTransfer.files.length === 0) return;
+    // Crée la conv si elle n'existe pas encore — upload immediat
+    const convId = await ensureConversation();
+    if (!convId) return;
+    filesHandleRef.current?.uploadFiles(e.dataTransfer.files);
   };
 
   // Prefill via searchParam : redirection depuis l'orchestrateur LLM auto.
@@ -257,14 +293,10 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
             className="flex items-end gap-2"
           >
           <AttachButton
-            onClick={() => {
-              if (!conversationId) {
-                toast.info(
-                  "Envoie d'abord un message à " + agent.name +
-                    ' pour pouvoir attacher des fichiers à cette discussion.'
-                );
-                return;
-              }
+            onClick={async () => {
+              // Cree la conv au vol si necessaire, puis ouvre le file picker
+              const convId = await ensureConversation();
+              if (!convId) return;
               filesHandleRef.current?.openFilePicker();
             }}
           />

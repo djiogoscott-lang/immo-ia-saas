@@ -86,16 +86,26 @@ export async function buildRagContext(
   const blocks = sources
     .map((s, idx) => {
       const score = (s.similarity * 100).toFixed(0);
-      return `[${idx + 1}] **${s.file_name}** (pertinence ${score}%)\n${s.content}`;
+      return `### [E${idx + 1}] — ${s.file_name} (pertinence ${score}%)\n${s.content}`;
     })
     .join('\n\n---\n\n');
 
   const systemPromptAddon = [
-    '## Contexte fichiers utilisateur',
+    '## CONTEXTE — Extraits des fichiers de l\'utilisateur',
     '',
-    "Voici des extraits pertinents tirés des fichiers que l'utilisateur a téléversés. Utilise-les en priorité pour répondre, et cite la source entre crochets, ex : « selon [nom_du_fichier.pdf] ». Si les extraits ne suffisent pas, complète avec tes connaissances générales.",
+    "L'utilisateur a téléversé des fichiers. Ci-dessous, les extraits les plus pertinents par rapport à sa question, identifiés par un libellé court : [E1], [E2], etc.",
     '',
     blocks,
+    '',
+    '---',
+    '',
+    '## RÈGLES D\'USAGE DE CE CONTEXTE (priorité maximale)',
+    '',
+    "1. **Utilise EN PRIORITÉ ces extraits** pour formuler ta réponse. Ne réécris pas de mémoire ce qui est déjà dans le document.",
+    "2. **Cite TOUJOURS la source** quand tu reprends une information : note le libellé entre crochets à la fin de la phrase, ex : « Le délai de rétractation est de 10 jours [E2]. »",
+    "3. **Si la réponse complète n'est PAS dans les extraits**, dis-le clairement : « Les extraits fournis ne mentionnent pas X. Voici ce que je peux dire en m'appuyant sur mes connaissances générales : … » — puis poursuis sans citation.",
+    "4. **N'invente JAMAIS** un chiffre, un article de loi, un nom propre, une date qui ne serait pas dans les extraits OU dans une source vérifiable (Légifrance pour Julia, INSEE pour Inès, etc.).",
+    "5. À la fin de ta réponse, ajoute une mini-section **Sources utilisées** listant les libellés [E1] etc. que tu as réellement cités (omets ceux non utilisés).",
     '',
     '---',
     '',
