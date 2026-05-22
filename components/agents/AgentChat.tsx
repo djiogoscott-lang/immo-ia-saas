@@ -39,6 +39,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import {
+  AttachButton,
+  ConversationFiles,
+  type ConversationFilesHandle,
+} from '@/components/agents/ConversationFiles';
 import { MarkdownMessage } from '@/components/agents/MarkdownMessage';
 import { QuickStartTemplates } from '@/components/agents/QuickStartTemplates';
 import { SaveDeliverableButton } from '@/components/agents/SaveDeliverableButton';
@@ -76,6 +81,13 @@ interface AgentChatProps {
 export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   const Icon = ICON_MAP[agent.icon];
 
+  // ID de la conversation Supabase. Initialement null (créé par /api/chat au
+  // 1er message), récupéré via le header X-Conversation-Id de la réponse.
+  // Permet à <ConversationFiles> de scoper les uploads à cette conversation.
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const filesHandleRef = useRef<ConversationFilesHandle | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   const {
     messages,
     input,
@@ -90,6 +102,13 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   } = useChat({
     api: '/api/chat',
     body: { agentId: agent.id },
+    onResponse: (res) => {
+      // Capture le conversationId créé/confirmé par le serveur (cf. /api/chat).
+      const headerId = res.headers.get('x-conversation-id');
+      if (headerId && headerId !== conversationId) {
+        setConversationId(headerId);
+      }
+    },
     onError: (err) => {
       console.error('[AgentChat] erreur de streaming :', err);
       toast.error("Erreur de communication avec l'agent", {
@@ -97,6 +116,24 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
       });
     },
   });
+
+  // Drag-and-drop : routes vers ConversationFiles.uploadFiles via le handle.
+  const handleDragOver = (e: React.DragEvent) => {
+    if (Array.from(e.dataTransfer.types).includes('Files')) {
+      e.preventDefault();
+      setIsDragOver(true);
+    }
+  };
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (e.currentTarget === e.target) setIsDragOver(false);
+  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (e.dataTransfer.files.length > 0) {
+      filesHandleRef.current?.uploadFiles(e.dataTransfer.files);
+    }
+  };
 
   // Prefill via searchParam : redirection depuis l'orchestrateur LLM auto.
   const searchParams = useSearchParams();
@@ -124,7 +161,23 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   })();
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-zinc-950">
+    <div
+      className="relative flex h-full flex-col bg-white dark:bg-zinc-950"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Overlay drag-and-drop */}
+      {isDragOver && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-cyan-500/10 backdrop-blur-sm">
+          <div className="rounded-2xl border-2 border-dashed border-cyan-500 bg-white px-8 py-6 text-center shadow-lg dark:bg-zinc-900">
+            <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">
+              Déposer pour attacher à cette conversation
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">PDF ou DOCX, 5 Mo max</p>
+          </div>
+        </div>
+      )}
       {/* En-tête avec identité de l'agent (masqué quand encapsulé dans AgentWorkspace) */}
       {!hideHeader && (
         <header className="flex items-center gap-3 border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -192,10 +245,29 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
 
       {/* Composer (input + envoi) */}
       <footer className="border-t border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto flex max-w-3xl items-end gap-2"
-        >
+        <div className="mx-auto max-w-3xl space-y-2">
+          {/* Chips fichiers attachés à la conversation */}
+          <ConversationFiles
+            ref={filesHandleRef}
+            conversationId={conversationId}
+          />
+
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-end gap-2"
+          >
+          <AttachButton
+            onClick={() => {
+              if (!conversationId) {
+                toast.info(
+                  "Envoie d'abord un message à " + agent.name +
+                    ' pour pouvoir attacher des fichiers à cette discussion.'
+                );
+                return;
+              }
+              filesHandleRef.current?.openFilePicker();
+            }}
+          />
           <textarea
             value={input}
             onChange={handleInputChange}
@@ -228,10 +300,11 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
               Envoyer
             </button>
           )}
-        </form>
-        <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-zinc-400">
-          {agent.name} peut faire des erreurs — vérifie les informations importantes.
-        </p>
+          </form>
+          <p className="text-center text-[11px] text-zinc-400">
+            {agent.name} peut faire des erreurs — vérifie les informations importantes.
+          </p>
+        </div>
       </footer>
     </div>
   );

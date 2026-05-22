@@ -110,6 +110,21 @@ export async function POST(request: Request) {
     );
   }
 
+  // Champ optionnel : si fourni, attache le fichier à une conversation précise
+  // (sinon, scope global). Validation UUID légère pour éviter d'envoyer
+  // n'importe quoi en FK.
+  const rawConvId = formData.get('conversationId');
+  let conversationId: string | null = null;
+  if (typeof rawConvId === 'string' && rawConvId.length > 0) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawConvId)) {
+      return Response.json(
+        { error: 'invalid_conversation_id', message: 'conversationId doit être un UUID.' },
+        { status: 400 }
+      );
+    }
+    conversationId = rawConvId;
+  }
+
   // --- 4. Valide taille + MIME ----------------------------------------------
   if (file.size === 0) {
     return Response.json(
@@ -143,6 +158,7 @@ export async function POST(request: Request) {
   // d'abord avec un path temporaire, puis on update après upload réussi.
   const fileRow = await createAgentFile({
     userId: user.id,
+    conversationId,
     storagePath: 'pending', // placeholder, mis à jour après l'upload Storage
     name: file.name,
     sizeBytes: file.size,
@@ -230,6 +246,7 @@ export async function POST(request: Request) {
         name: file.name,
         size_bytes: file.size,
         mime_type: file.type,
+        conversation_id: conversationId,
         status: 'ready',
         chunks_count: chunks.length,
         meta,

@@ -78,6 +78,7 @@ export function FilesPageClient({ initialFiles }: FilesPageClientProps) {
           {
             id: data.id,
             user_id: '',
+            conversation_id: data.conversation_id ?? null,
             storage_path: '',
             name: data.name,
             size_bytes: data.size_bytes,

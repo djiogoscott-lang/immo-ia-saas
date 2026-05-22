@@ -22,9 +22,13 @@ export interface ChunkOptions {
 }
 
 export function chunkText(text: string, options: ChunkOptions = {}): string[] {
-  const target = options.targetChars ?? 1000;
-  const max = options.maxChars ?? 1500;
-  const overlap = options.overlapChars ?? 200;
+  // Cibles ajustées (2026-05-22) pour améliorer la qualité du RAG :
+  // chunks plus longs (1500 chars) = plus de contexte cohérent par extrait.
+  // Effet uniquement sur les NOUVEAUX uploads — les fichiers déjà indexés
+  // gardent leurs chunks d'origine tant qu'ils ne sont pas re-uploadés.
+  const target = options.targetChars ?? 1500;
+  const max = options.maxChars ?? 2200;
+  const overlap = options.overlapChars ?? 250;
 
   const trimmed = text.trim();
   if (!trimmed) return [];

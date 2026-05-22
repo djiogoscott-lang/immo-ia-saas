@@ -35,6 +35,25 @@ export async function GET(request: Request) {
   const limitParam = Number.parseInt(url.searchParams.get('limit') ?? '50', 10);
   const offsetParam = Number.parseInt(url.searchParams.get('offset') ?? '0', 10);
 
+  // Scope :
+  //   ?scope=global         → uniquement les fichiers globaux (pool partagé)
+  //   ?conversationId=xxx   → uniquement les fichiers attachés à cette conv
+  //   rien                  → tous les fichiers du user (admin / debug)
+  const scopeParam = url.searchParams.get('scope');
+  const convIdParam = url.searchParams.get('conversationId');
+  let conversationId: string | null | undefined = undefined;
+  if (scopeParam === 'global') {
+    conversationId = null;
+  } else if (typeof convIdParam === 'string' && convIdParam.length > 0) {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(convIdParam)) {
+      return Response.json(
+        { error: 'invalid_conversation_id', message: 'conversationId doit être un UUID.' },
+        { status: 400 }
+      );
+    }
+    conversationId = convIdParam;
+  }
+
   const files = await listAgentFiles(user.id, {
     status:
       statusParam && (VALID_STATUSES as readonly string[]).includes(statusParam)
@@ -42,6 +61,7 @@ export async function GET(request: Request) {
         : undefined,
     limit: Number.isFinite(limitParam) ? Math.min(limitParam, 200) : 50,
     offset: Number.isFinite(offsetParam) ? Math.max(offsetParam, 0) : 0,
+    conversationId,
   });
 
   return Response.json({ files });

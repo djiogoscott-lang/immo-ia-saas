@@ -224,7 +224,9 @@ export async function POST(request: Request) {
   if (!isDemoMode && user) {
     const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUserMsg) {
-      const rag = await buildRagContext(lastUserMsg.content, user.id);
+      const rag = await buildRagContext(lastUserMsg.content, user.id, {
+        conversationId: conversation?.id ?? null,
+      });
       if (rag.systemPromptAddon) {
         systemPrompt = `${rag.systemPromptAddon}\n${agent.systemPrompt}`;
         console.log(

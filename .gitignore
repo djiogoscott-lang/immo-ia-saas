@@ -18,6 +18,9 @@ tsconfig.tsbuildinfo
 .env.*
 !.env.example
 *.env.download
+# Variante sans point (parfois créée par erreur — protection defense in depth)
+env.local
+env
 
 # Secrets (defense in depth)
 *.pem

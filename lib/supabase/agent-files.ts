@@ -35,6 +35,8 @@ export type AgentFileStatus = 'processing' | 'ready' | 'error';
 export interface AgentFile {
   id: string;
   user_id: string;
+  /** NULL = pool global user. UUID = attaché à une conversation (CASCADE delete). */
+  conversation_id: string | null;
   storage_path: string;
   name: string;
   size_bytes: number;
@@ -115,6 +117,8 @@ export interface CreateAgentFileInput {
   name: string;
   sizeBytes: number;
   mimeType: string;
+  /** Si fourni, le fichier est lié à cette conversation et supprimé en CASCADE avec elle. */
+  conversationId?: string | null;
 }
 
 export async function createAgentFile(
@@ -125,6 +129,7 @@ export async function createAgentFile(
     .from('agent_files')
     .insert({
       user_id: input.userId,
+      conversation_id: input.conversationId ?? null,
       storage_path: input.storagePath,
       name: input.name,
       size_bytes: input.sizeBytes,
@@ -178,6 +183,13 @@ export interface ListAgentFilesOptions {
   status?: AgentFileStatus;
   limit?: number;
   offset?: number;
+  /**
+   * Scope :
+   *   - undefined  → tous les fichiers du user (global + tous scopes conversation)
+   *   - null       → uniquement les fichiers globaux (page /agents/files)
+   *   - string     → uniquement les fichiers attachés à cette conversation
+   */
+  conversationId?: string | null;
 }
 
 export async function listAgentFiles(
@@ -192,6 +204,15 @@ export async function listAgentFiles(
     .order('created_at', { ascending: false });
 
   if (options.status) query = query.eq('status', options.status);
+
+  // Distinction explicite : `null` filtre sur conversation_id IS NULL ;
+  // `undefined` ne filtre pas du tout.
+  if (options.conversationId === null) {
+    query = query.is('conversation_id', null);
+  } else if (typeof options.conversationId === 'string') {
+    query = query.eq('conversation_id', options.conversationId);
+  }
+
   if (options.limit) query = query.limit(options.limit);
   if (options.offset && options.limit) {
     query = query.range(options.offset, options.offset + options.limit - 1);
@@ -255,6 +276,12 @@ export async function insertChunks(chunks: ChunkInput[]): Promise<{ error?: stri
 export interface MatchChunksOptions {
   threshold?: number; // 0..1, défaut 0.5
   count?: number;     // top-N, défaut 5
+  /**
+   * Si fourni, élargit la recherche aux fichiers attachés à cette conversation
+   * EN PLUS des fichiers globaux du user. Si NULL/undefined, seuls les
+   * fichiers globaux (conversation_id IS NULL) sont considérés.
+   */
+  conversationId?: string | null;
 }
 
 export async function matchChunks(
@@ -268,6 +295,7 @@ export async function matchChunks(
     p_user_id: userId,
     p_threshold: options.threshold ?? 0.5,
     p_count: options.count ?? 5,
+    p_conversation_id: options.conversationId ?? null,
   });
 
   if (error) {

@@ -1,5 +1,6 @@
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import { Inter_Tight } from 'next/font/google';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Toaster } from 'sonner';
@@ -7,6 +8,14 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { APP_NAME } from '@/lib/branding';
 import './globals.css';
+
+const interTight = Inter_Tight({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '800', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+});
 
 /**
  * RootLayout — layout racine OBLIGATOIRE pour Next.js App Router.
@@ -43,7 +52,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`dark ${GeistSans.variable} ${GeistMono.variable}`}
+      className={`dark ${GeistSans.variable} ${GeistMono.variable} ${interTight.variable}`}
     >
       <body className="min-h-screen bg-zinc-950 font-sans text-zinc-50 antialiased">
         <ThemeProvider>

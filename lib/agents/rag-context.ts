@@ -28,6 +28,12 @@ export interface BuildRagOptions {
   threshold?: number;
   /** Top-N chunks à récupérer. Défaut 5. */
   count?: number;
+  /**
+   * ID de la conversation courante. Si fourni, le RAG cherche dans les
+   * fichiers globaux du user + ceux attachés à cette conversation précise
+   * (ignore les fichiers d'autres conversations).
+   */
+  conversationId?: string | null;
 }
 
 export async function buildRagContext(
@@ -53,9 +59,16 @@ export async function buildRagContext(
 
   let sources: ChunkMatch[];
   try {
+    // Paramètres ajustés (2026-05-22) après constat de récupération trop conservatrice :
+    // - threshold 0.25 (vs 0.5) → capte les passages modérément pertinents, pas seulement
+    //   les correspondances quasi-exactes
+    // - count 12 (vs 5)       → injecte plus de chunks pour vue large du document
+    // Le bon compromis dépend du domaine ; ces valeurs sont saines pour de l'analyse
+    // de PDF juridiques/immo où l'information utile est souvent paraphrasée.
     sources = await matchChunks(embedding, userId, {
-      threshold: options.threshold ?? 0.5,
-      count: options.count ?? 5,
+      threshold: options.threshold ?? 0.25,
+      count: options.count ?? 12,
+      conversationId: options.conversationId ?? null,
     });
   } catch (err) {
     console.warn(

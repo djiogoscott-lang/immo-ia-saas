@@ -25,7 +25,9 @@ export default async function FilesPage() {
     const user = await getCurrentUser();
     if (user) {
       isAuthenticated = true;
-      initialFiles = await listAgentFiles(user.id, { limit: 100 });
+      // conversationId: null → uniquement le pool global (les fichiers attachés
+      // à une conversation précise sont gérés dans /agents/[id] directement).
+      initialFiles = await listAgentFiles(user.id, { limit: 100, conversationId: null });
     }
   }
 
@@ -44,9 +46,10 @@ export default async function FilesPage() {
             Mes fichiers
           </h1>
           <p className="mt-1 text-sm text-zinc-400">
-            Téléverse des PDF ou DOCX (max 5 MB). Tes fichiers enrichissent
-            automatiquement le contexte de tous tes agents (recherche
-            sémantique RAG).
+            Pool global : ces fichiers sont accessibles à <strong>tous tes agents
+            dans toutes tes conversations</strong>. Pour un fichier ponctuel
+            (rattaché à une seule discussion), utilise plutôt le bouton trombone
+            dans le chat de l'agent.
           </p>
         </div>
       </header>
