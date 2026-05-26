@@ -138,16 +138,16 @@ Un profil est automatiquement créé via le trigger SQL `handle_new_user`.
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Orchestrateur LLM
+### Orchestrateur conversationnel (Charly)
 
-Quand l'utilisateur tape une requête libre sur la page d'accueil (sans
-sélectionner un agent), `POST /api/route-agent` appelle Claude 3.5 Haiku
-avec un schéma Zod strict pour classer la requête vers l'un des 12 agents.
+Quand l'utilisateur ne sait pas vers quel expert se tourner, il peut cliquer
+sur "Parler à Charly" depuis la page `/agents`. Charly est l'orchestratrice
+conversationnelle : elle qualifie le besoin en dialogue puis propose un
+handoff manuel vers l'agent spécialisé approprié.
 
-- **Coût** : ~500-1500 tokens par appel (≈ 0,001 € en 2026)
-- **Précision** : excellente sur des requêtes claires, faible sur les
-  requêtes vagues (le router renvoie `confidence < 0.5` et l'UI demande
-  une confirmation manuelle)
+Note : un ancien router LLM séparé (`/api/route-agent` + classification Zod)
+existait avant et a été supprimé (Lot 3) — il dupliquait la logique
+d'orchestration de Charly.
 
 ---
 
@@ -180,7 +180,8 @@ Le miroir humainement lisible est dans
 | Route | Méthode | Rôle | Auth requise |
 |---|---|---|---|
 | `/api/chat` | POST | Streaming d'une conversation avec un agent | Oui |
-| `/api/route-agent` | POST | Classification automatique vers un agent | Oui |
+| `/api/conversations` | POST | Crée une conversation vide (upload avant 1er message) | Oui |
+| `/api/agent-files/upload` | POST | Upload PDF/DOCX + extraction + embeddings | Oui |
 | `/auth/callback` | GET | Callback Supabase Auth (email confirm + OAuth) | Non |
 | `/auth/signout` | POST | Déconnexion | Oui |
 
@@ -206,7 +207,7 @@ Le miroir humainement lisible est dans
 | Endpoint | Limite | Fenêtre |
 |---|---|---|
 | `/api/chat` | 30 / user | 1 minute |
-| `/api/route-agent` | 20 / user | 1 minute |
+| `/api/agent-files/upload` | 10 / user | 5 minutes |
 | Auth (login/signup) | 5 / IP | 15 minutes |
 
 ⚠️ Le rate limiter actuel est **in-memory** (single-instance). Pour la prod
@@ -222,7 +223,7 @@ serverless multi-instance, basculer vers Upstash Redis (voir
 ├── app/
 │   ├── (app)/agents/
 │   │   ├── layout.tsx           # Sidebar + main (server async, charge user/profile)
-│   │   ├── page.tsx             # /agents : RouterInput + Grid des 12 agents
+│   │   ├── page.tsx             # /agents : CTA Charly + Grid des 11 agents
 │   │   └── [agentId]/
 │   │       └── page.tsx         # /agents/[id] : valide l'id, rend AgentChat
 │   ├── (auth)/
@@ -230,8 +231,9 @@ serverless multi-instance, basculer vers Upstash Redis (voir
 │   │   ├── login/page.tsx       # Form de connexion (server action)
 │   │   └── signup/page.tsx      # Form d'inscription avec rôle
 │   ├── api/
-│   │   ├── chat/route.ts        # Streaming OpenRouter + persistance
-│   │   └── route-agent/route.ts # Classification LLM
+│   │   ├── chat/route.ts        # Streaming OpenRouter + RAG + persistance
+│   │   ├── conversations/route.ts # Crée une conversation vide
+│   │   └── agent-files/         # Upload + extract + embed + match RAG
 │   ├── auth/
 │   │   ├── callback/route.ts    # Callback Supabase Auth
 │   │   └── signout/route.ts     # POST signout
@@ -242,10 +244,8 @@ serverless multi-instance, basculer vers Upstash Redis (voir
 ├── components/
 │   ├── agents/
 │   │   ├── AgentSidebar.tsx     # Nav latérale (groupée par catégorie, filtrée par rôle)
-│   │   ├── AgentGrid.tsx        # Cartes des 12 agents avec badges couleurs
-│   │   ├── AgentCard.tsx        # (inline dans AgentGrid)
-│   │   ├── AgentChat.tsx        # useChat() + markdown + actions
-│   │   ├── AgentRouterInput.tsx # Barre de routing LLM auto
+│   │   ├── AgentGrid.tsx        # Cartes des 11 agents avec halo gradient au hover
+│   │   ├── AgentChat.tsx        # useChat() + markdown + actions + upload
 │   │   ├── MarkdownMessage.tsx  # Rendu Markdown stylé (react-markdown + remark-gfm)
 │   │   └── QuickStartTemplates.tsx  # 3 cartes de démarrage par agent
 │   └── auth/
@@ -253,8 +253,8 @@ serverless multi-instance, basculer vers Upstash Redis (voir
 │
 ├── lib/
 │   ├── agents/
-│   │   ├── registry.ts          # 12 agents (system prompts, métadonnées)
-│   │   ├── router.ts            # Orchestrateur LLM (generateObject + Zod)
+│   │   ├── registry.ts          # 11 agents (system prompts, métadonnées)
+│   │   ├── rag-context.ts       # Construction du contexte RAG injecté dans /api/chat
 │   │   └── templates.ts         # 36 templates quick-start (3 par agent)
 │   ├── auth/
 │   │   └── get-current-user.ts  # Helpers user/profile/requireUser

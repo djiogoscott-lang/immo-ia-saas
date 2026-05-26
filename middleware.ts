@@ -5,8 +5,7 @@
  *   1. Rafraîchir la session Supabase à chaque requête (via `updateSession`).
  *   2. Protéger les routes nécessitant l'auth :
  *        - /agents/*  → redirection vers /login si non connecté
- *        - /api/chat        → 401 si non connecté (la route renvoie elle-même)
- *        - /api/route-agent → idem
+ *        - /api/chat  → 401 si non connecté (la route renvoie elle-même)
  *   3. Empêcher d'accéder à /login et /signup quand on est déjà connecté.
  *
  * Routes publiques (toujours accessibles) :

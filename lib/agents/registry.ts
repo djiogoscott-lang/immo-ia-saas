@@ -21,7 +21,6 @@
  * Source unique consommée par :
  *   - components/agents/AgentSidebar
  *   - components/agents/AgentGrid
- *   - lib/agents/router.ts
  *   - app/api/chat/route.ts
  *
  * Le nom de marque est injecté via APP_NAME (lib/branding.ts).
