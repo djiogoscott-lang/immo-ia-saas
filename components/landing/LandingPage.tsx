@@ -1,67 +1,20 @@
 /**
- * LandingPage — page d'accueil publique pour les visiteurs non authentifiés.
+ * LandingPage — style Linear/Vercel flashy.
  *
- * Server component. Présente le produit, les 12 agents et invite à créer un
- * compte. Reprend la palette de couleurs des catégories (Production indigo,
- * Communication sky, Analyse emerald, Pilotage violet, Formation amber) pour
- * la cohérence visuelle avec l'app authentifiée.
+ * Server component. Fond zinc-950 avec mesh gradient violet/fuchsia/blue dans
+ * le hero, gradient text aurora sur les titres, cards avec halo colore au
+ * hover, boutons CTA avec shadow glow lumineuse.
+ *
+ * Palette signature : violet-500 + fuchsia-500 + pink-500 + cyan-400.
  */
 
+import { ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import {
-  ArrowRight,
-  BarChart3,
-  Calculator,
-  ClipboardCheck,
-  DoorOpen,
-  FileSignature,
-  FileText,
-  Mailbox,
-  Megaphone,
-  PenSquare,
-  Phone,
-  Users,
-  Presentation,
-  Scale,
-  Sparkles,
-  TrendingUp,
-  Zap,
-  type LucideIcon,
-} from 'lucide-react';
 
-import {
-  AGENT_LIST,
-  type AgentCategory,
-  type AgentConfig,
-} from '@/lib/agents/registry';
+import { AgentAvatar } from '@/components/agents/AgentAvatar';
+import { AGENT_LIST, type AgentConfig } from '@/lib/agents/registry';
 import { APP_NAME } from '@/lib/branding';
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Sparkles,
-  Phone,
-  Megaphone,
-  PenSquare,
-  DoorOpen,
-  Calculator,
-  Scale,
-  Users,
-  Zap,
-  TrendingUp,
-  FileSignature,
-  FileText,
-  Mailbox,
-  Presentation,
-  BarChart3,
-  ClipboardCheck,
-};
-
-const CATEGORY_GRADIENTS: Record<AgentCategory, string> = {
-  orchestrateur: 'from-indigo-500 to-indigo-600',
-  production: 'from-emerald-500 to-emerald-600',
-  communication: 'from-sky-500 to-sky-600',
-  analyse: 'from-rose-500 to-rose-600',
-  pilotage: 'from-violet-500 to-violet-600',
-};
+import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
 // Composant principal
@@ -69,7 +22,7 @@ const CATEGORY_GRADIENTS: Record<AgentCategory, string> = {
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+    <div className="min-h-screen bg-zinc-950 text-white antialiased">
       <TopNav />
       <Hero />
       <Stats />
@@ -87,12 +40,13 @@ export function LandingPage() {
 
 function TopNav() {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 lg:px-10">
+    <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
         <Link href="/" className="flex items-center gap-2">
-          <span aria-hidden className="text-xl">🏠</span>
-          <span className="text-base font-semibold">{APP_NAME}</span>
-          <span className="rounded bg-cyan-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300">
+          <span className="text-base font-semibold tracking-tight text-white">
+            {APP_NAME}
+          </span>
+          <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-violet-300">
             V2
           </span>
         </Link>
@@ -100,15 +54,16 @@ function TopNav() {
         <nav className="flex items-center gap-2">
           <Link
             href="/login"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:text-white"
           >
             Connexion
           </Link>
           <Link
             href="/signup"
-            className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-cyan-700"
+            className="group relative inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all hover:shadow-[0_0_30px_rgba(217,70,239,0.5)] hover:-translate-y-px"
           >
-            Créer un compte
+            Creer un compte
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
           </Link>
         </nav>
       </div>
@@ -117,57 +72,65 @@ function TopNav() {
 }
 
 // ---------------------------------------------------------------------------
-// Hero
+// Hero — avec mesh gradient + aurora text
 // ---------------------------------------------------------------------------
 
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      {/* Gradient de fond subtil */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-50/60 via-white to-indigo-50/30 dark:from-cyan-950/20 dark:via-zinc-950 dark:to-indigo-950/20"
-      />
+      {/* Mesh gradient en background — orbes flous colores */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-40 left-1/2 h-[600px] w-[1000px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.25),transparent_60%)] blur-3xl" />
+        <div className="absolute -top-20 left-1/4 h-[400px] w-[600px] bg-[radial-gradient(circle_at_center,rgba(236,72,153,0.18),transparent_60%)] blur-3xl" />
+        <div className="absolute top-40 right-1/4 h-[500px] w-[700px] bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.15),transparent_60%)] blur-3xl" />
+        {/* Grain subtile */}
+        <div
+          className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+          }}
+        />
+      </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-20 lg:px-10 lg:py-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-700 dark:border-cyan-900 dark:bg-cyan-950/40 dark:text-cyan-300">
-            <Sparkles className="h-3 w-3" aria-hidden />
-            Plateforme multi-agents · Nouveauté V2
+      <div className="mx-auto max-w-7xl px-6 py-24 lg:px-10 lg:py-32">
+        <div className="mx-auto max-w-4xl text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-zinc-300 backdrop-blur-md">
+            <Sparkles className="h-3 w-3 text-fuchsia-300" aria-hidden />
+            Plateforme multi-agents IA · Nouveaute V2
           </span>
 
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-6xl dark:text-zinc-50">
-            L'IA spécialisée pour les{' '}
-            <span className="bg-gradient-to-r from-cyan-600 to-indigo-600 bg-clip-text text-transparent">
-              agences immobilières
+          <h1 className="mt-8 text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+            <span className="block text-white">L'IA specialisee</span>
+            <span className="block bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+              pour l'immobilier.
             </span>
           </h1>
 
-          <p className="mt-6 text-lg leading-relaxed text-zinc-600 dark:text-zinc-300">
-            12 agents conçus pour les conseillers, managers et assistants immobiliers.
-            De la prospection terrain aux questions juridiques, de l'analyse de
-            marché aux comptes-rendus de RDV : gagnez du temps sans sacrifier la
-            qualité.
+          <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-zinc-300 sm:text-xl">
+            11 agents conçus pour les conseillers, managers et assistantes
+            immobiliers. Prospection, juridique, marketing, comptes-rendus,
+            analyse de marche : gagnez du temps sans sacrifier la qualite.
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/signup"
-              className="group inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-cyan-700 hover:shadow-md"
+              className="group relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 px-7 py-3.5 text-base font-semibold text-white shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_50px_rgba(217,70,239,0.6)]"
             >
-              Créer mon compte
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              <span>Creer mon compte</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-base font-medium text-zinc-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-base font-semibold text-zinc-100 backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10"
             >
               Se connecter
             </Link>
           </div>
 
-          <p className="mt-6 text-xs text-zinc-500 dark:text-zinc-400">
-            Aucune carte bancaire requise · Compte créé en 30 secondes
+          <p className="mt-8 text-xs text-zinc-500">
+            Aucune carte bancaire requise · Compte cree en 30 secondes
           </p>
         </div>
       </div>
@@ -176,29 +139,42 @@ function Hero() {
 }
 
 // ---------------------------------------------------------------------------
-// Stats
+// Stats — chiffres avec gradient text
 // ---------------------------------------------------------------------------
 
 function Stats() {
   return (
-    <section className="border-y border-slate-100 bg-slate-50/40 dark:border-zinc-800 dark:bg-zinc-900/30">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-slate-100 px-0 dark:bg-zinc-800 sm:grid-cols-4">
-        <StatItem value="12" label="agents spécialisés" />
-        <StatItem value="3" label="profils métier" />
-        <StatItem value="5" label="catégories d'usage" />
-        <StatItem value="< 5 s" label="première réponse" />
+    <section className="relative border-y border-white/5 bg-zinc-950/50">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/5 sm:grid-cols-4">
+        <StatItem value="11" label="agents specialises" gradient="from-violet-400 to-fuchsia-400" />
+        <StatItem value="3" label="profils metier" gradient="from-fuchsia-400 to-pink-400" />
+        <StatItem value="5" label="categories" gradient="from-pink-400 to-orange-400" />
+        <StatItem value="< 5 s" label="premiere reponse" gradient="from-cyan-400 to-blue-400" />
       </div>
     </section>
   );
 }
 
-function StatItem({ value, label }: { value: string; label: string }) {
+function StatItem({
+  value,
+  label,
+  gradient,
+}: {
+  value: string;
+  label: string;
+  gradient: string;
+}) {
   return (
-    <div className="bg-white px-6 py-8 text-center dark:bg-zinc-950">
-      <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
+    <div className="px-6 py-10 text-center">
+      <p
+        className={cn(
+          'bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl',
+          gradient
+        )}
+      >
         {value}
       </p>
-      <p className="mt-1 text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+      <p className="mt-2 text-xs font-medium uppercase tracking-widest text-zinc-500">
         {label}
       </p>
     </div>
@@ -206,27 +182,35 @@ function StatItem({ value, label }: { value: string; label: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Showcase des 12 agents
+// Showcase agents — cards glow au hover
 // ---------------------------------------------------------------------------
 
 function AgentsShowcase() {
   return (
-    <section className="py-20 lg:py-28">
-      <div className="mx-auto max-w-6xl px-6 lg:px-10">
+    <section className="relative py-24 lg:py-32">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-0 top-1/3 h-[300px] w-[500px] bg-[radial-gradient(circle_at_left,rgba(168,85,247,0.1),transparent_70%)] blur-3xl" />
+        <div className="absolute right-0 bottom-1/3 h-[300px] w-[500px] bg-[radial-gradient(circle_at_right,rgba(34,211,238,0.08),transparent_70%)] blur-3xl" />
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
-            Nos agents
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-fuchsia-400">
+            L'equipe
           </p>
-          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-            12 agents pour 12 missions immobilières
+          <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <span className="text-white">11 agents pour</span>{' '}
+            <span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+              11 missions.
+            </span>
           </h2>
-          <p className="mt-4 text-base text-zinc-600 dark:text-zinc-300">
-            Chaque agent est spécialisé pour un cas d'usage précis. Vous gardez
-            le contrôle, l'IA fait le travail répétitif.
+          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-400">
+            Chaque agent est specialise pour un cas d'usage precis. Vous gardez
+            le controle, l'IA fait le travail repetitif.
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {AGENT_LIST.map((agent) => (
             <AgentTeaser key={agent.id} agent={agent} />
           ))}
@@ -237,23 +221,21 @@ function AgentsShowcase() {
 }
 
 function AgentTeaser({ agent }: { agent: AgentConfig }) {
-  const Icon = ICON_MAP[agent.icon];
-  const gradient = CATEGORY_GRADIENTS[agent.category];
-
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex items-start gap-3">
-        <div
-          aria-hidden
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm transition-transform group-hover:scale-105 ${gradient}`}
-        >
-          {Icon ? <Icon className="h-5 w-5" strokeWidth={2.2} /> : null}
-        </div>
+    <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/40 hover:bg-white/[0.07]">
+      {/* Halo colore qui apparait au hover */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-px -z-10 rounded-2xl bg-gradient-to-br from-violet-500/0 via-fuchsia-500/0 to-pink-500/0 opacity-0 blur-xl transition-opacity duration-500 group-hover:from-violet-500/30 group-hover:via-fuchsia-500/20 group-hover:to-pink-500/30 group-hover:opacity-100"
+      />
+
+      <div className="flex items-start gap-4">
+        <AgentAvatar agentId={agent.id} size="md" status={null} />
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
+          <h3 className="font-semibold leading-tight text-white">
             {agent.name}
           </h3>
-          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-zinc-400">
             {agent.tagline}
           </p>
         </div>
@@ -263,7 +245,7 @@ function AgentTeaser({ agent }: { agent: AgentConfig }) {
 }
 
 // ---------------------------------------------------------------------------
-// How it works
+// How it works — steps avec gradient number
 // ---------------------------------------------------------------------------
 
 function HowItWorks() {
@@ -272,47 +254,55 @@ function HowItWorks() {
       n: '01',
       title: 'Choisis ton agent',
       description:
-        "Sélectionne l'agent adapté à ton besoin du moment, ou laisse l'orchestrateur IA le faire pour toi en décrivant simplement ta demande.",
+        "Selectionne l'agent adapte a ton besoin, ou laisse Charly l'orchestratrice le faire pour toi en decrivant simplement ta demande.",
+      gradient: 'from-violet-400 to-fuchsia-400',
     },
     {
       n: '02',
-      title: 'Décris ton besoin',
+      title: 'Decris ton besoin',
       description:
-        "Tape ton message ou pars d'un template de démarrage rapide. L'agent te pose les bonnes questions pour obtenir un résultat sur mesure.",
+        "Tape ton message ou pars d'un template de demarrage rapide. L'agent te pose les bonnes questions pour obtenir un resultat sur mesure.",
+      gradient: 'from-fuchsia-400 to-pink-400',
     },
     {
       n: '03',
-      title: 'Récupère ton livrable',
+      title: 'Recupere ton livrable',
       description:
-        "Mail, courrier, post réseaux sociaux, tableau, argumentaire… Copie, télécharge ou régénère. Tes conversations restent accessibles à tout moment.",
+        "Mail, courrier, post reseaux sociaux, tableau, argumentaire… Copie, telecharge ou regenere. Tes conversations restent accessibles a tout moment.",
+      gradient: 'from-cyan-400 to-blue-400',
     },
   ];
 
   return (
-    <section className="border-y border-slate-100 bg-slate-50/40 py-20 dark:border-zinc-800 dark:bg-zinc-900/30 lg:py-28">
-      <div className="mx-auto max-w-6xl px-6 lg:px-10">
+    <section className="relative border-y border-white/5 bg-zinc-950/60 py-24 lg:py-32">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
-            Démarrage simple
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
+            Demarrage simple
           </p>
-          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-            Comment ça marche
+          <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            Comment ça marche.
           </h2>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
           {steps.map((step) => (
             <div
               key={step.n}
-              className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-7 backdrop-blur-xl transition-all hover:border-white/20"
             >
-              <span className="inline-block rounded-lg bg-cyan-50 px-2.5 py-1 font-mono text-xs font-semibold text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300">
+              <p
+                className={cn(
+                  'bg-gradient-to-r bg-clip-text font-mono text-5xl font-bold text-transparent',
+                  step.gradient
+                )}
+              >
                 {step.n}
-              </span>
-              <h3 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              </p>
+              <h3 className="mt-5 text-lg font-semibold text-white">
                 {step.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              <p className="mt-3 text-sm leading-relaxed text-zinc-400">
                 {step.description}
               </p>
             </div>
@@ -324,27 +314,34 @@ function HowItWorks() {
 }
 
 // ---------------------------------------------------------------------------
-// CTA final
+// CTA final — mega mesh gradient
 // ---------------------------------------------------------------------------
 
 function FinalCTA() {
   return (
-    <section className="py-20 lg:py-28">
+    <section className="relative overflow-hidden py-24 lg:py-32">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-1/2 h-[700px] w-[1100px] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg_at_50%_50%,rgba(168,85,247,0.2),rgba(217,70,239,0.18),rgba(236,72,153,0.2),rgba(34,211,238,0.15),rgba(168,85,247,0.2))] blur-3xl" />
+      </div>
+
       <div className="mx-auto max-w-4xl px-6 text-center lg:px-10">
-        <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-          Prêt à gagner du temps sur tes tâches répétitives ?
+        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          <span className="text-white">Pret a gagner</span>{' '}
+          <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+            du temps ?
+          </span>
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-base text-zinc-600 dark:text-zinc-300">
-          Crée ton compte en 30 secondes, choisis ton rôle, et commence à
-          utiliser les 12 agents dès maintenant.
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-300 sm:text-lg">
+          Compte cree en 30 secondes. Aucune carte bancaire. Acces immediat aux
+          11 agents.
         </p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             href="/signup"
-            className="group inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-3 text-base font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-cyan-700 hover:shadow-md"
+            className="group relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 px-8 py-4 text-base font-semibold text-white shadow-[0_0_50px_rgba(168,85,247,0.6)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(217,70,239,0.7)]"
           >
-            Créer mon compte
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+            Creer mon compte
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
           </Link>
         </div>
       </div>
@@ -358,19 +355,15 @@ function FinalCTA() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-100 bg-white py-10 dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 text-sm text-zinc-500 lg:flex-row lg:px-10 dark:text-zinc-400">
+    <footer className="border-t border-white/5 bg-zinc-950 py-10">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-zinc-500 lg:flex-row lg:px-10">
         <div className="flex items-center gap-2">
-          <span aria-hidden>🏠</span>
-          <span>
-            <strong className="font-semibold text-zinc-700 dark:text-zinc-300">
-              {APP_NAME}
-            </strong>{' '}
-            · propulsé par Start Academy
-          </span>
+          <span className="font-semibold text-zinc-300">{APP_NAME}</span>
+          <span>·</span>
+          <span>propulse par Start Academy</span>
         </div>
         <div className="flex items-center gap-6">
-          <span>© {new Date().getFullYear()} — Tous droits réservés</span>
+          <span>© {new Date().getFullYear()} — Tous droits reserves</span>
         </div>
       </div>
     </footer>

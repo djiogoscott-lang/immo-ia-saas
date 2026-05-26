@@ -1,14 +1,11 @@
 'use client';
 
 /**
- * AgentGrid — grille premium des 11 agents (8 featured + 3 advanced).
+ * AgentGrid — grille premium des 11 agents (style Linear/Vercel flashy).
  *
- * Design Limova/NAIOM-like :
- *   - Cartes glassmorphism : bg semi-transparent + backdrop-blur
- *   - Avatars visuels (image custom si dispo, sinon DiceBear SVG auto-généré)
- *   - Badge d'état directement intégré dans l'avatar (point coloré ready/active)
- *   - Animations Framer Motion (stagger d'entrée + hover lift)
- *   - 2 sections : "Équipe principale" (featured, avatars LG) + "Outils spécialisés" (advanced, avatars MD)
+ * Cards glassmorphism sombre + halo gradient violet/fuchsia au hover + animations
+ * Framer Motion stagger. Deux sections : "Equipe principale" (FEATURED, 8 agents)
+ * + "Outils specialises" (ADVANCED, 3 agents).
  */
 
 import { motion } from 'framer-motion';
@@ -16,10 +13,10 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 import { AgentAvatar } from '@/components/agents/AgentAvatar';
-import { getAccentStyle } from '@/lib/agents/accent-styles';
 import {
   ADVANCED_AGENTS,
   FEATURED_AGENTS,
+  type AgentAccent,
   type AgentConfig,
 } from '@/lib/agents/registry';
 import { cn } from '@/lib/utils';
@@ -30,23 +27,66 @@ const AUDIENCE_LABELS: Record<AgentConfig['audience'][number], string> = {
   assistante: 'Assistantes',
 };
 
+// Gradient halo par accent agent (utilise au hover des cards)
+const ACCENT_HALO: Record<AgentAccent, string> = {
+  indigo: 'group-hover:from-indigo-500/30 group-hover:via-indigo-500/15 group-hover:to-blue-500/25',
+  sky: 'group-hover:from-sky-500/30 group-hover:via-sky-500/15 group-hover:to-cyan-500/25',
+  pink: 'group-hover:from-pink-500/30 group-hover:via-fuchsia-500/15 group-hover:to-rose-500/25',
+  amber: 'group-hover:from-amber-500/30 group-hover:via-orange-500/15 group-hover:to-yellow-500/25',
+  emerald: 'group-hover:from-emerald-500/30 group-hover:via-emerald-500/15 group-hover:to-teal-500/25',
+  violet: 'group-hover:from-violet-500/30 group-hover:via-violet-500/15 group-hover:to-purple-500/25',
+  rose: 'group-hover:from-rose-500/30 group-hover:via-rose-500/15 group-hover:to-pink-500/25',
+  orange: 'group-hover:from-orange-500/30 group-hover:via-orange-500/15 group-hover:to-red-500/25',
+  cyan: 'group-hover:from-cyan-500/30 group-hover:via-cyan-500/15 group-hover:to-sky-500/25',
+  fuchsia: 'group-hover:from-fuchsia-500/30 group-hover:via-fuchsia-500/15 group-hover:to-pink-500/25',
+  lime: 'group-hover:from-lime-500/30 group-hover:via-lime-500/15 group-hover:to-green-500/25',
+};
+
+const ACCENT_BORDER: Record<AgentAccent, string> = {
+  indigo: 'group-hover:border-indigo-500/40',
+  sky: 'group-hover:border-sky-500/40',
+  pink: 'group-hover:border-pink-500/40',
+  amber: 'group-hover:border-amber-500/40',
+  emerald: 'group-hover:border-emerald-500/40',
+  violet: 'group-hover:border-violet-500/40',
+  rose: 'group-hover:border-rose-500/40',
+  orange: 'group-hover:border-orange-500/40',
+  cyan: 'group-hover:border-cyan-500/40',
+  fuchsia: 'group-hover:border-fuchsia-500/40',
+  lime: 'group-hover:border-lime-500/40',
+};
+
+const ACCENT_TEXT: Record<AgentAccent, string> = {
+  indigo: 'text-indigo-300',
+  sky: 'text-sky-300',
+  pink: 'text-pink-300',
+  amber: 'text-amber-300',
+  emerald: 'text-emerald-300',
+  violet: 'text-violet-300',
+  rose: 'text-rose-300',
+  orange: 'text-orange-300',
+  cyan: 'text-cyan-300',
+  fuchsia: 'text-fuchsia-300',
+  lime: 'text-lime-300',
+};
+
 // ---------------------------------------------------------------------------
 // Composant principal
 // ---------------------------------------------------------------------------
 
 export function AgentGrid() {
   return (
-    <div className="space-y-14">
+    <div className="space-y-16">
       <AgentSection
-        title="Équipe principale"
-        description="Vos 8 experts du quotidien immobilier — accessibles à tout moment."
+        title="Equipe principale"
+        description="Vos 8 experts du quotidien immobilier — accessibles a tout moment."
         agents={[...FEATURED_AGENTS]}
         baseDelay={0}
       />
 
       <AgentSection
-        title="Outils spécialisés"
-        description="Agents pointus pour les analyses approfondies — études de marché, DPE, rédaction d'offres."
+        title="Outils specialises"
+        description="Agents pointus pour les analyses approfondies — etudes de marche, DPE, redaction d'offres."
         agents={[...ADVANCED_AGENTS]}
         baseDelay={0.3}
         subdued
@@ -87,20 +127,16 @@ function AgentSection({
             id={`section-${title}`}
             className={cn(
               'text-base font-semibold tracking-tight',
-              subdued
-                ? 'text-zinc-500 dark:text-zinc-400'
-                : 'text-zinc-900 dark:text-zinc-50'
+              subdued ? 'text-zinc-400' : 'text-white'
             )}
           >
             {title}
           </h2>
-          <span className="rounded-full border border-zinc-200/60 bg-zinc-50/60 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500 backdrop-blur-md dark:border-zinc-800/60 dark:bg-zinc-900/60 dark:text-zinc-400">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-zinc-400 backdrop-blur-md">
             {agents.length} agent{agents.length > 1 ? 's' : ''}
           </span>
         </div>
-        <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-          {description}
-        </p>
+        <p className="mt-1.5 text-sm text-zinc-400">{description}</p>
       </motion.header>
 
       <div
@@ -125,7 +161,7 @@ function AgentSection({
 }
 
 // ---------------------------------------------------------------------------
-// Carte agent — avatar central, identité, tagline, footer audiences
+// Carte agent — glassmorphism + halo gradient au hover
 // ---------------------------------------------------------------------------
 
 interface AgentCardProps {
@@ -135,7 +171,9 @@ interface AgentCardProps {
 }
 
 function AgentCard({ agent, delay, subdued }: AgentCardProps) {
-  const accent = getAccentStyle(agent.accent);
+  const halo = ACCENT_HALO[agent.accent];
+  const border = ACCENT_BORDER[agent.accent];
+  const accentText = ACCENT_TEXT[agent.accent];
 
   // Split "Charly — Orchestratrice" → "Charly" + "Orchestratrice"
   const [firstName, ...roleParts] = agent.name.split('—').map((s) => s.trim());
@@ -152,25 +190,23 @@ function AgentCard({ agent, delay, subdued }: AgentCardProps) {
         href={`/agents/${agent.id}`}
         aria-label={`Ouvrir ${agent.name}`}
         className={cn(
-          'group relative flex h-full flex-col overflow-hidden rounded-2xl border p-5 shadow-sm backdrop-blur-xl transition-all duration-200',
-          'hover:shadow-xl',
+          'group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300',
           subdued
-            ? 'border-zinc-200/60 bg-white/40 dark:border-zinc-800/40 dark:bg-zinc-900/40'
-            : 'border-zinc-200/80 bg-white/60 dark:border-zinc-800/60 dark:bg-zinc-900/60',
-          accent.cardHoverBorder,
-          accent.cardHoverShadow
+            ? 'border-white/5 hover:bg-white/[0.05]'
+            : 'border-white/10 hover:bg-white/[0.07]',
+          border
         )}
       >
-        {/* Halo coloré subtil, dévoilé au hover */}
+        {/* Halo colore au hover (glow gradient interne) */}
         <div
           aria-hidden
           className={cn(
-            'pointer-events-none absolute -inset-x-8 -top-12 h-32 rounded-full blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-30',
-            accent.iconBg
+            'pointer-events-none absolute -inset-px -z-10 rounded-2xl bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100',
+            halo
           )}
         />
 
-        {/* Avatar + status (intégré) */}
+        {/* Avatar + badge categorie */}
         <div className="flex items-start justify-between">
           <motion.div
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -183,31 +219,30 @@ function AgentCard({ agent, delay, subdued }: AgentCardProps) {
             />
           </motion.div>
 
-          {/* Badge catégorie discret */}
           <span
             className={cn(
-              'rounded-full border border-current/20 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider backdrop-blur-md',
-              accent.badgeText
+              'rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest backdrop-blur-md',
+              accentText
             )}
           >
             {agent.category}
           </span>
         </div>
 
-        {/* Identité */}
+        {/* Identite */}
         <div className="mt-5">
-          <h3 className="text-lg font-semibold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h3 className="text-lg font-semibold leading-tight tracking-tight text-white">
             {firstName}
           </h3>
           {role && (
-            <p className={cn('mt-0.5 text-xs font-medium', accent.badgeText)}>
+            <p className={cn('mt-0.5 text-xs font-medium', accentText)}>
               {role}
             </p>
           )}
         </div>
 
         {/* Tagline */}
-        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-400">
           {agent.tagline}
         </p>
 
@@ -216,15 +251,15 @@ function AgentCard({ agent, delay, subdued }: AgentCardProps) {
           {agent.audience.map((aud) => (
             <span
               key={aud}
-              className="rounded-full bg-zinc-100/80 px-2 py-0.5 text-[10px] font-medium text-zinc-600 backdrop-blur-md dark:bg-zinc-800/80 dark:text-zinc-300"
+              className="rounded-full border border-white/5 bg-white/5 px-2 py-0.5 text-[10px] font-medium text-zinc-400 backdrop-blur-md"
             >
               {AUDIENCE_LABELS[aud]}
             </span>
           ))}
           <span
             className={cn(
-              'ml-auto inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition-transform duration-200 group-hover:translate-x-0.5',
-              accent.accentText
+              'ml-auto inline-flex items-center gap-1 text-xs font-medium text-zinc-500 transition-all duration-200 group-hover:translate-x-0.5',
+              accentText && 'group-hover:' + accentText
             )}
           >
             Ouvrir
