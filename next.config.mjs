@@ -36,6 +36,14 @@ const nextConfig = {
         './node_modules/@napi-rs/canvas-linux-x64-gnu/**',
         './node_modules/@napi-rs/canvas-linux-x64-musl/**',
         './node_modules/pdf-to-png-converter/**',
+        // pdf-to-png-converter delegue le rendu a pdfjs-dist qui charge
+        // dynamiquement les cmaps (CJK + caracteres non-latins) et les
+        // polices standards via fs.readFile. Ces fichiers sont des assets
+        // .bcmap / .pfb que le tracer Next.js ne detecte pas tout seul.
+        // Sans cette inclusion, l'OCR plante avec "Failed to fetch cMap"
+        // sur tout PDF qui n'embarque pas ses propres polices.
+        './node_modules/pdfjs-dist/cmaps/**',
+        './node_modules/pdfjs-dist/standard_fonts/**',
       ],
     },
   },
