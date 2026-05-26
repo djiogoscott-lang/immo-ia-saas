@@ -151,6 +151,22 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
     },
   });
 
+  // Wrap handleSubmit/append/reload pour TOUJOURS envoyer le conversationId
+  // courant. Sans ca, le backend cree une nouvelle conversation a chaque
+  // message (car body est capture une seule fois a l'init du hook), et les
+  // fichiers uploades via 📎 — attaches a la conv pre-existante creee par
+  // ensureConversation() — deviennent invisibles au RAG.
+  const extraBody = () =>
+    conversationId ? { conversationId } : {};
+
+  const onFormSubmit = (e: React.FormEvent) => {
+    handleSubmit(e, { body: extraBody() });
+  };
+  const appendWithConv: typeof append = (message, options) =>
+    append(message, { ...options, body: { ...(options?.body ?? {}), ...extraBody() } });
+  const reloadWithConv: typeof reload = (options) =>
+    reload({ ...options, body: { ...(options?.body ?? {}), ...extraBody() } });
+
   // Drag-and-drop : routes vers ConversationFiles.uploadFiles via le handle.
   const handleDragOver = (e: React.DragEvent) => {
     if (Array.from(e.dataTransfer.types).includes('Files')) {
@@ -178,9 +194,10 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
   useEffect(() => {
     if (prefill && !prefillSentRef.current) {
       prefillSentRef.current = true;
-      append({ role: 'user', content: prefill });
+      appendWithConv({ role: 'user', content: prefill });
     }
-  }, [prefill, append]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefill]);
 
   // Auto-scroll en bas à chaque nouveau message
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -262,7 +279,7 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
               isLastAssistant={
                 message.role === 'assistant' && idx === lastAssistantIdx
               }
-              onRegenerate={reload}
+              onRegenerate={reloadWithConv}
               streaming={isLoading && idx === lastAssistantIdx}
             />
           ))}
@@ -289,7 +306,7 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
           />
 
           <form
-            onSubmit={handleSubmit}
+            onSubmit={onFormSubmit}
             className="flex items-end gap-2"
           >
           <AttachButton
@@ -310,7 +327,7 @@ export function AgentChat({ agent, hideHeader = false }: AgentChatProps) {
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
-                handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
+                onFormSubmit(event as unknown as React.FormEvent<HTMLFormElement>);
               }
             }}
           />
