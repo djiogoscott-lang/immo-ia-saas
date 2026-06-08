@@ -65,9 +65,15 @@ const config: Config = {
       letterSpacing: {
         'display-tight': '-0.04em',
         'display-tighter': '-0.05em',
-        // Letter-spacing Vercel : aggressive negatif (-2.4px sur display-xl 48px = -0.05em)
+        // Letter-spacings derives de DESIGN.md (px -> em) :
+        //   display-xl (48px)  -2.4px  -> -0.05em  -> tracking-vercel-hero
+        //   display-lg (32px)  -1.28px -> -0.04em  -> tracking-vercel-display
+        //   display-md (24px)  -0.96px -> -0.04em  -> tracking-vercel-display
+        //   display-sm (20px)  -0.6px  -> -0.03em  -> tracking-vercel-display-sm
+        //   body-sm    (14px)  -0.28px -> -0.02em  -> tracking-vercel-body-sm
         'vercel-hero': '-0.05em',
         'vercel-display': '-0.04em',
+        'vercel-display-sm': '-0.03em',
         'vercel-body-sm': '-0.02em',
       },
       backgroundImage: {

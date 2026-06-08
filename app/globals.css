@@ -8,8 +8,13 @@
 
 :root {
   color-scheme: light dark;
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: var(--font-geist-mono), 'SFMono-Regular', Menlo, Consolas, monospace;
+  /* Stacks alignees sur DESIGN.md (Vercel) :
+   * sans  -> Geist, Inter, system-ui, -apple-system, sans-serif
+   * mono  -> Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, monospace
+   * Les variables --font-geist-sans / --font-geist-mono sont injectees par
+   * geist/font/sans et geist/font/mono dans app/layout.tsx. */
+  --font-sans: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', Menlo, Monaco, monospace;
 }
 
 html,
