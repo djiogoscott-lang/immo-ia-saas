@@ -34,11 +34,11 @@ const ACCENT_HALO: Record<AgentAccent, string> = {
   pink: 'group-hover:from-pink-500/30 group-hover:via-fuchsia-500/15 group-hover:to-rose-500/25',
   amber: 'group-hover:from-amber-500/30 group-hover:via-orange-500/15 group-hover:to-yellow-500/25',
   emerald: 'group-hover:from-emerald-500/30 group-hover:via-emerald-500/15 group-hover:to-teal-500/25',
-  violet: 'group-hover:from-violet-500/30 group-hover:via-violet-500/15 group-hover:to-purple-500/25',
+  violet: 'group-hover:from-vercel-violet/30 group-hover:via-vercel-violet/15 group-hover:to-purple-500/25',
   rose: 'group-hover:from-rose-500/30 group-hover:via-rose-500/15 group-hover:to-pink-500/25',
   orange: 'group-hover:from-orange-500/30 group-hover:via-orange-500/15 group-hover:to-red-500/25',
   cyan: 'group-hover:from-cyan-500/30 group-hover:via-cyan-500/15 group-hover:to-sky-500/25',
-  fuchsia: 'group-hover:from-fuchsia-500/30 group-hover:via-fuchsia-500/15 group-hover:to-pink-500/25',
+  fuchsia: 'group-hover:from-vercel-pink/30 group-hover:via-vercel-pink/15 group-hover:to-vercel-pink/25',
   lime: 'group-hover:from-lime-500/30 group-hover:via-lime-500/15 group-hover:to-green-500/25',
 };
 
@@ -48,11 +48,11 @@ const ACCENT_BORDER: Record<AgentAccent, string> = {
   pink: 'group-hover:border-pink-500/40',
   amber: 'group-hover:border-amber-500/40',
   emerald: 'group-hover:border-emerald-500/40',
-  violet: 'group-hover:border-violet-500/40',
+  violet: 'group-hover:border-vercel-violet/40',
   rose: 'group-hover:border-rose-500/40',
   orange: 'group-hover:border-orange-500/40',
   cyan: 'group-hover:border-cyan-500/40',
-  fuchsia: 'group-hover:border-fuchsia-500/40',
+  fuchsia: 'group-hover:border-vercel-pink/40',
   lime: 'group-hover:border-lime-500/40',
 };
 

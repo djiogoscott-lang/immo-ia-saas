@@ -69,8 +69,8 @@ const CATEGORY_GRADIENT: Record<AgentCategory, string> = {
   orchestrateur: 'from-indigo-400 to-violet-400',
   production: 'from-emerald-400 to-teal-400',
   communication: 'from-sky-400 to-cyan-400',
-  analyse: 'from-fuchsia-400 to-pink-400',
-  pilotage: 'from-violet-400 to-purple-400',
+  analyse: 'from-vercel-pink to-vercel-pink',
+  pilotage: 'from-vercel-violet to-vercel-violet',
 };
 
 // ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ export function AgentWorkspace({ agent }: AgentWorkspaceProps) {
                   className={cn(
                     'group relative flex items-center gap-1.5 rounded-t-md border-b-2 px-3 py-2.5 text-sm font-medium transition-all',
                     isActive
-                      ? 'border-fuchsia-500 text-white shadow-[0_4px_20px_rgba(217,70,239,0.3)]'
+                      ? 'border-vercel-pink text-white shadow-[0_4px_20px_rgba(255,0,128,0.3)]'
                       : 'border-transparent text-zinc-500 hover:border-white/10 hover:text-zinc-200'
                   )}
                 >
@@ -232,7 +232,7 @@ function KpiCard({
   label,
   value,
   variation,
-  gradient = 'from-violet-400 to-fuchsia-400',
+  gradient = 'from-vercel-violet to-vercel-pink',
 }: KpiCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl transition-all hover:border-white/20">
@@ -252,7 +252,7 @@ function KpiCard({
             `bg-gradient-to-br ${gradient} bg-clip-text text-transparent`
           )}
         >
-          <Icon className="h-4 w-4 text-fuchsia-300" aria-hidden />
+          <Icon className="h-4 w-4 text-vercel-pink" aria-hidden />
         </span>
         {variation && (
           <span className="text-xs font-semibold text-emerald-400">
@@ -279,16 +279,16 @@ function AnalyticsTab({ agent }: { agent: AgentConfig }) {
       {/* Halo background subtile */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-96 w-[800px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,rgba(217,70,239,0.08),transparent_70%)] blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-96 w-[800px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,rgba(255,0,128,0.10),transparent_70%)] blur-3xl"
       />
 
       <header className="mb-8">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-fuchsia-400">
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-vercel-pink">
           Donnees simulees
         </p>
         <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
           Performance de{' '}
-          <span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-vercel-violet to-vercel-pink bg-clip-text text-transparent">
             {agent.name.split('—')[0].trim()}
           </span>
         </h2>
@@ -304,14 +304,14 @@ function AnalyticsTab({ agent }: { agent: AgentConfig }) {
           label="Requetes traitees (30 j)"
           value="124"
           variation="+18 %"
-          gradient="from-violet-400 to-fuchsia-400"
+          gradient="from-vercel-violet to-vercel-pink"
         />
         <KpiCard
           icon={Clock}
           label="Temps gagne estime"
           value="18 h"
           variation="+2 h 10"
-          gradient="from-fuchsia-400 to-pink-400"
+          gradient="from-vercel-pink to-vercel-pink"
         />
         <KpiCard
           icon={Target}
@@ -340,7 +340,7 @@ function AnalyticsTab({ agent }: { agent: AgentConfig }) {
           {[40, 55, 38, 70, 62, 80, 65, 88, 72, 95, 82, 100].map((h, i) => (
             <div
               key={i}
-              className="flex-1 rounded-t-sm bg-gradient-to-t from-violet-500/40 via-fuchsia-500/70 to-pink-400 shadow-[0_0_10px_rgba(217,70,239,0.3)]"
+              className="flex-1 rounded-t-sm bg-gradient-to-t from-vercel-violet/40 via-vercel-pink/70 to-vercel-pink shadow-[0_0_10px_rgba(255,0,128,0.3)]"
               style={{ height: `${h}%` }}
               aria-hidden
             />
@@ -403,7 +403,7 @@ function HistoryTab({
   return (
     <div className="relative mx-auto max-w-5xl px-6 py-8 lg:px-10">
       <header className="mb-8">
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-vercel-cyan">
           Donnees simulees
         </p>
         <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
@@ -427,11 +427,11 @@ function HistoryTab({
             <button
               type="button"
               onClick={onResume}
-              className="group flex w-full items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-fuchsia-500/40 hover:bg-white/[0.06] hover:shadow-[0_0_30px_rgba(217,70,239,0.15)]"
+              className="group flex w-full items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-vercel-pink/40 hover:bg-white/[0.06] hover:shadow-[0_0_30px_rgba(255,0,128,0.18)]"
             >
               <span
                 aria-hidden
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 text-fuchsia-300"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-gradient-to-br from-vercel-pink/20 to-vercel-pink/20 text-vercel-pink"
               >
                 <MessageCircle className="h-4 w-4" />
               </span>
