@@ -402,4 +402,4 @@ entrée dans `QUICK_START_TEMPLATES`.
 
 ## Licence
 
-Propriétaire — Start Academy. Tous droits réservés.
+Distribué sous licence [MIT](./LICENSE).

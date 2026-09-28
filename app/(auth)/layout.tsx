@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 /**
- * Layout minimaliste pour les pages d'authentification (/login, /signup).
+ * Layout minimaliste pour les pages d'authentification (/login).
  * Pas de sidebar, pas de header : juste un fond et un container centré.
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {

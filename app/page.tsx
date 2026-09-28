@@ -11,12 +11,6 @@ import { LandingPage } from '@/components/landing/LandingPage';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function HomePage() {
-  // Mode démo : pas d'auth, on affiche directement la landing publique.
-  // ACTIVÉ PAR DÉFAUT — désactiver via DEMO_MODE=false en prod.
-  if (process.env.DEMO_MODE !== 'false') {
-    return <LandingPage />;
-  }
-
   const supabase = createClient();
   const {
     data: { user },

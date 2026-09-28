@@ -7,14 +7,12 @@
  *
  * Body : { agentId: string, title?: string }
  * Response : { id, agent_id, title, created_at }
- *
- * Mode démo : refuse car DB inaccessible. L'UI doit gérer ce cas.
  */
 
 import { z } from 'zod';
 
-import { isValidAgentId } from '@/lib/agents/registry';
-import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { canAccessAgent, getAgent, isValidAgentId } from '@/lib/agents/registry';
+import { getCurrentProfile } from '@/lib/auth/get-current-user';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { createConversation } from '@/lib/supabase/conversations';
 
@@ -27,19 +25,7 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    return Response.json(
-      {
-        error: 'demo_mode',
-        message:
-          "La création de conversation persistante n'est pas disponible en mode démo. Connecte-toi pour activer cette fonctionnalité.",
-      },
-      { status: 403 }
-    );
-  }
-
-  const user = await getCurrentUser();
+  const user = await getCurrentProfile();
   if (!user) {
     return Response.json(
       { error: 'unauthorized', message: 'Connexion requise.' },
@@ -92,6 +78,12 @@ export async function POST(request: Request) {
     return Response.json(
       { error: 'unknown_agent', message: `Agent "${agentId}" inconnu.` },
       { status: 400 }
+    );
+  }
+  if (!canAccessAgent(getAgent(agentId), user.role)) {
+    return Response.json(
+      { error: 'forbidden_agent', message: "Cet agent n'est pas disponible pour votre rôle." },
+      { status: 403 }
     );
   }
 

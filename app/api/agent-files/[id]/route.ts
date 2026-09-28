@@ -15,14 +15,6 @@ interface RouteContext {
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    return Response.json(
-      { error: 'demo_mode', message: 'Suppression non disponible en mode démo.' },
-      { status: 403 }
-    );
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return Response.json(

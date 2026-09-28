@@ -3,8 +3,6 @@
  *
  * Liste tous les livrables archivés de l'utilisateur connecté, avec filtres
  * par agent et par campagne. Server component (data fetch direct via Supabase).
- *
- * Mode démo : message d'information (auth Supabase requise).
  */
 
 import { Bookmark } from 'lucide-react';
@@ -19,13 +17,6 @@ import { cn } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 export default async function LibraryPage() {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-
-  // Cas mode démo : pas d'auth Supabase, donc pas de livrables
-  if (isDemoMode) {
-    return <DemoModeNotice />;
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return (
@@ -133,39 +124,6 @@ export default async function LibraryPage() {
           })}
         </div>
       )}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Sous-composants
-// ---------------------------------------------------------------------------
-
-function DemoModeNotice() {
-  return (
-    <div className="mx-auto max-w-3xl px-6 py-14">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-        Bibliothèque
-      </p>
-      <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-        Tes livrables archivés
-      </h1>
-      <div className="mt-8 rounded-2xl border border-amber-200/70 bg-amber-50/60 p-6 backdrop-blur-xl dark:border-amber-900/40 dark:bg-amber-950/30">
-        <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-          La bibliothèque nécessite une session authentifiée.
-        </p>
-        <p className="mt-2 text-sm text-amber-800 dark:text-amber-200/80">
-          Le mode démo n&apos;a pas de persistance utilisateur — tes productions
-          d&apos;agents ne sont pas archivées. Pour activer la bibliothèque,
-          configure Supabase et désactive <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/40">DEMO_MODE</code>.
-        </p>
-        <p className="mt-3 text-xs text-amber-700 dark:text-amber-300/80">
-          Migration SQL à appliquer côté Supabase :{' '}
-          <code className="rounded bg-amber-100 px-1 py-0.5 font-mono dark:bg-amber-900/40">
-            migrations/v3_deliverables.sql
-          </code>
-        </p>
-      </div>
     </div>
   );
 }

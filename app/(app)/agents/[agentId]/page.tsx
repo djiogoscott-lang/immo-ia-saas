@@ -3,7 +3,7 @@
  *
  * Server component qui :
  *   1. Valide l'agentId via `isValidAgentId()` → 404 si inconnu
- *   2. Charge la config complète via `getAgent()`
+ *   2. Charge la config complète via `getAgent()`, 404 si le rôle n'y a pas accès
  *   3. Délègue le rendu interactif à `<AgentChat>` (composant client)
  *
  * Le system prompt n'est JAMAIS envoyé au client : il reste côté serveur
@@ -15,7 +15,8 @@
 import { notFound } from 'next/navigation';
 
 import { AgentWorkspace } from '@/components/agents/AgentWorkspace';
-import { getAgent, isValidAgentId } from '@/lib/agents/registry';
+import { canAccessAgent, getAgent, isValidAgentId } from '@/lib/agents/registry';
+import { getCurrentProfile } from '@/lib/auth/get-current-user';
 import { APP_NAME, APP_NAME_SHORT } from '@/lib/branding';
 
 interface AgentChatPageProps {
@@ -34,12 +35,18 @@ export async function generateMetadata({ params }: AgentChatPageProps) {
   };
 }
 
-export default function AgentChatPage({ params }: AgentChatPageProps) {
+export default async function AgentChatPage({ params }: AgentChatPageProps) {
   if (!isValidAgentId(params.agentId)) {
     notFound();
   }
 
   const agent = getAgent(params.agentId);
+
+  // Agent hors de l'audience du rôle → 404 (pas de fuite de son existence).
+  const profile = await getCurrentProfile();
+  if (!profile || !canAccessAgent(agent, profile.role)) {
+    notFound();
+  }
 
   return <AgentWorkspace agent={agent} />;
 }

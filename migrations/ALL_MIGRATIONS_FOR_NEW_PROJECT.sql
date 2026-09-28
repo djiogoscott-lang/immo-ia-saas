@@ -2,7 +2,7 @@
 -- TOUT-EN-UN — Migration complète pour un nouveau projet Supabase Immo IA SaaS
 -- ===========================================================================
 -- Contient : v2 (tables de base) + v3 (livrables) + v4 (RAG fichiers)
--- + storage policies
+-- + storage (bucket + policies) + v5 (fichiers par conversation) + v6 (sécurité)
 --
 -- À copier-coller intégralement dans Supabase Dashboard > SQL Editor > Run.
 -- IDEMPOTENT : peut être relancé sans casser.
@@ -393,6 +393,192 @@ create policy "agent_files storage: delete own"
     bucket_id = 'agent-files'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
+
+-- ===========================================================================
+-- STORAGE — Bucket privé des fichiers RAG
+-- ===========================================================================
+
+insert into storage.buckets (id, name, public)
+values ('agent-files', 'agent-files', false)
+on conflict (id) do nothing;
+
+-- ===========================================================================
+-- V5 — Fichiers attachés à une conversation
+-- ===========================================================================
+--
+-- Évolutions :
+--   (1) `agent_files.conversation_id` (nullable) — scope d'un fichier :
+--         NULL  = pool global du user (visible par toutes ses conversations)
+--         UUID  = ponctuel à une conversation précise (CASCADE à sa suppression)
+--   (2) Fonction `match_agent_files_chunks` mise à jour : nouveau paramètre
+--       `p_conversation_id` qui inclut les fichiers globaux + ceux de la conv.
+--   (3) Fix du CHECK constraint `conversations.agent_id` qui listait encore les
+--       anciens IDs V2 (assist-immo, my-boitage, …). Remplacé par les 11
+--       nouveaux IDs Limova (charly, tom, john, lou, elio, manue, julia, rony,
+--       theo, ines, anais).
+--
+-- À exécuter dans Supabase Dashboard > SQL Editor > Run.
+-- Idempotent : utilise IF NOT EXISTS / DROP CONSTRAINT IF EXISTS.
+-- =============================================================================
+
+
+-- -----------------------------------------------------------------------------
+-- 1. Fix CHECK constraint sur conversations.agent_id (anciens IDs V2 → V3)
+-- -----------------------------------------------------------------------------
+
+-- Le nom du CHECK généré par Postgres est "conversations_agent_id_check".
+-- On le drop si présent puis on en pose un nouveau avec la liste à jour.
+alter table public.conversations
+  drop constraint if exists conversations_agent_id_check;
+
+alter table public.conversations
+  add constraint conversations_agent_id_check
+  check (agent_id in (
+    'charly',
+    'tom',
+    'john',
+    'lou',
+    'elio',
+    'manue',
+    'julia',
+    'rony',
+    'theo',
+    'ines',
+    'anais'
+  ));
+
+
+-- -----------------------------------------------------------------------------
+-- 2. Ajout colonne conversation_id à agent_files
+-- -----------------------------------------------------------------------------
+
+alter table public.agent_files
+  add column if not exists conversation_id uuid null
+    references public.conversations(id) on delete cascade;
+
+comment on column public.agent_files.conversation_id is
+  'NULL = fichier du pool global utilisateur. UUID = fichier attaché à une conversation précise (supprimé en cascade avec elle).';
+
+-- Index combiné pour les requêtes "fichiers de cette conv" et "fichiers globaux du user"
+create index if not exists agent_files_user_conv_idx
+  on public.agent_files (user_id, conversation_id, created_at desc);
+
+
+-- -----------------------------------------------------------------------------
+-- 3. Mise à jour de match_agent_files_chunks pour accepter un scope conversation
+-- -----------------------------------------------------------------------------
+-- Sémantique :
+--   p_conversation_id = NULL  → renvoie uniquement les fichiers globaux
+--   p_conversation_id = UUID  → renvoie globaux + fichiers de cette conv
+--                               (ignore les fichiers des autres conversations)
+
+create or replace function public.match_agent_files_chunks(
+  query_embedding   vector(768),
+  p_user_id         uuid,
+  p_threshold       float default 0.5,
+  p_count           int   default 5,
+  p_conversation_id uuid  default null
+)
+returns table (
+  chunk_id     uuid,
+  file_id      uuid,
+  file_name    text,
+  chunk_index  integer,
+  content      text,
+  similarity   float
+)
+language sql stable as $
+  select
+    c.id        as chunk_id,
+    c.file_id,
+    f.name      as file_name,
+    c.chunk_index,
+    c.content,
+    1 - (c.embedding <=> query_embedding) as similarity
+  from public.agent_files_chunks c
+  join public.agent_files f on f.id = c.file_id
+  where c.user_id = p_user_id
+    and f.status  = 'ready'
+    and (
+      f.conversation_id is null
+      or (p_conversation_id is not null and f.conversation_id = p_conversation_id)
+    )
+    and 1 - (c.embedding <=> query_embedding) > p_threshold
+  order by c.embedding <=> query_embedding asc
+  limit p_count;
+$;
+
+
+-- -----------------------------------------------------------------------------
+-- 4. Vérification rapide (à exécuter et relire après run)
+-- -----------------------------------------------------------------------------
+-- select count(*) filter (where conversation_id is null)  as global_files,
+--        count(*) filter (where conversation_id is not null) as conv_files,
+--        count(*) as total
+-- from public.agent_files;
+--
+-- select conname, pg_get_constraintdef(oid) from pg_constraint
+-- where conrelid = 'public.conversations'::regclass;
+--
+-- select proname, pg_get_function_arguments(oid) from pg_proc
+-- where proname = 'match_agent_files_chunks';
+
+-- =============================================================================
+-- Fin v5
+-- =============================================================================
+
+-- ===========================================================================
+-- V6 — Sécurité : rôles non modifiables par l'utilisateur
+-- ===========================================================================
+--
+-- Corrige une escalade de privilèges :
+--   (1) `handle_new_user` lisait le rôle dans `raw_user_meta_data`, donnée
+--       fournie par le client à l'inscription → n'importe qui pouvait
+--       s'inscrire "manager".
+--   (2) La policy UPDATE sur `profiles` autorisait l'utilisateur à modifier
+--       TOUTES les colonnes de son profil, dont `role` et `agency_id`.
+--
+-- Après cette migration :
+--   - tout nouveau compte est créé avec le rôle `conseiller` ;
+--   - l'utilisateur ne peut plus modifier que son `full_name` ;
+--   - un rôle ne se change que par un administrateur (SQL Editor Supabase,
+--     qui s'exécute en tant que `postgres` et contourne la RLS) :
+--
+--       update public.profiles set role = 'manager'
+--       where id = (select id from auth.users where email = 'ton@email.com');
+--
+-- Idempotent : peut être ré-exécuté sans effet de bord.
+-- =============================================================================
+
+-- 1. Trigger de création de profil : rôle imposé côté serveur.
+--    `name` / `user_name` : champs fournis par GitHub OAuth.
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+BEGIN
+  INSERT INTO public.profiles (id, full_name, role)
+  VALUES (
+    NEW.id,
+    COALESCE(
+      NEW.raw_user_meta_data->>'full_name',
+      NEW.raw_user_meta_data->>'name',
+      NEW.raw_user_meta_data->>'user_name',
+      split_part(NEW.email, '@', 1)
+    ),
+    'conseiller'
+  );
+  RETURN NEW;
+END;
+$;
+
+-- 2. Seul `full_name` est modifiable par l'utilisateur lui-même.
+--    La policy RLS "Users can update their own profile" reste en place
+--    (elle filtre les LIGNES) ; les privilèges de colonne filtrent les COLONNES.
+REVOKE UPDATE ON public.profiles FROM anon, authenticated;
+GRANT UPDATE (full_name) ON public.profiles TO authenticated;
 
 -- ===========================================================================
 -- VERIFICATION FINALE

@@ -46,18 +46,6 @@ const createBodySchema = z.object({
 // ---------------------------------------------------------------------------
 
 export async function POST(request: Request) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    return Response.json(
-      {
-        error: 'demo_mode',
-        message:
-          "La sauvegarde de livrables n'est pas disponible en mode démo. Connecte-toi pour archiver tes productions d'agents.",
-      },
-      { status: 403 }
-    );
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return Response.json(
@@ -138,11 +126,6 @@ export async function POST(request: Request) {
 // ---------------------------------------------------------------------------
 
 export async function GET(request: Request) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    return Response.json({ deliverables: [], demoMode: true });
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return Response.json(

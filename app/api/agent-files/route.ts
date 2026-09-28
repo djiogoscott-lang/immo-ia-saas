@@ -17,11 +17,6 @@ export const dynamic = 'force-dynamic';
 const VALID_STATUSES: readonly AgentFileStatus[] = ['processing', 'ready', 'error'];
 
 export async function GET(request: Request) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    return Response.json({ files: [], demoMode: true });
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     return Response.json(

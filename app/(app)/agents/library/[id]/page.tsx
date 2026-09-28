@@ -24,11 +24,6 @@ interface DeliverablePageProps {
 export const dynamic = 'force-dynamic';
 
 export default async function DeliverablePage({ params }: DeliverablePageProps) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    notFound();
-  }
-
   const user = await getCurrentUser();
   if (!user) {
     notFound();

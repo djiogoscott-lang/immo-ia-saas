@@ -26,8 +26,8 @@ import { streamText, type CoreMessage } from 'ai';
 import { z } from 'zod';
 
 import { buildRagContext } from '@/lib/agents/rag-context';
-import { getAgent, isValidAgentId } from '@/lib/agents/registry';
-import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { canAccessAgent, getAgent, isValidAgentId } from '@/lib/agents/registry';
+import { getCurrentProfile } from '@/lib/auth/get-current-user';
 import { APP_NAME } from '@/lib/branding';
 import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import {
@@ -45,15 +45,31 @@ export const maxDuration = 60;
 // Schéma de validation du body
 // ---------------------------------------------------------------------------
 
+// Bornes anti-abus : un client ne doit ni injecter de messages `system`
+// (qui écraseraient le system prompt de l'agent) ni faire exploser les coûts.
+const MAX_MESSAGE_CHARS = 20_000;
+const MAX_MESSAGES = 60;
+const MAX_TOTAL_CHARS = 150_000;
+
 const messageSchema = z.object({
   id: z.string().optional(),
-  role: z.enum(['system', 'user', 'assistant', 'tool', 'data']),
-  content: z.string(),
+  role: z.enum(['user', 'assistant']),
+  content: z.string().max(MAX_MESSAGE_CHARS),
 });
 
 const bodySchema = z.object({
   agentId: z.string().min(1),
-  messages: z.array(messageSchema).min(1),
+  messages: z
+    .array(messageSchema)
+    .min(1)
+    .max(MAX_MESSAGES)
+    .refine((msgs) => msgs[msgs.length - 1]?.role === 'user', {
+      message: 'Le dernier message doit provenir de l’utilisateur.',
+    })
+    .refine(
+      (msgs) => msgs.reduce((sum, m) => sum + m.content.length, 0) <= MAX_TOTAL_CHARS,
+      { message: 'Conversation trop longue.' }
+    ),
   /** ID de conversation Supabase. Si absent, une nouvelle conversation est créée. */
   conversationId: z.string().uuid().optional(),
 });
@@ -84,31 +100,19 @@ function getOpenRouterClient() {
 // ---------------------------------------------------------------------------
 
 export async function POST(request: Request) {
-  // Mode démo activé par défaut — désactiver via DEMO_MODE=false en prod.
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-
-  // 1. Auth : skip en mode démo (auth désactivée pour l'accès libre).
-  //    Sinon : user connecté obligatoire.
-  let user: { id: string } | null = null;
-  let identifier: string;
-
-  if (isDemoMode) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-    identifier = `chat:ip:${ip}`;
-  } else {
-    user = await getCurrentUser();
-    if (!user) {
-      return Response.json(
-        { error: 'unauthorized', message: 'Connexion requise.' },
-        { status: 401 }
-      );
-    }
-    identifier = `chat:${user.id}`;
+  // 1. Auth : user connecté + profil obligatoires (le rôle sert au contrôle
+  //    d'accès aux agents plus bas).
+  const profile = await getCurrentProfile();
+  if (!profile) {
+    return Response.json(
+      { error: 'unauthorized', message: 'Connexion requise.' },
+      { status: 401 }
+    );
   }
 
   // 2. Rate limit
   const rl = rateLimit({
-    identifier,
+    identifier: `chat:${profile.id}`,
     ...RATE_LIMITS.chat,
   });
   if (!rl.success) {
@@ -164,46 +168,51 @@ export async function POST(request: Request) {
   }
   const agent = getAgent(agentId);
 
-  // 5. Récupération ou création de la conversation — SKIP en mode démo
-  //    (les tables Supabase ne sont pas requises). En mode normal : RLS Supabase.
-  let conversation: { id: string; user_id: string } | null = null;
+  // 4bis. Contrôle d'accès par rôle — le filtrage de la sidebar n'est que
+  //       cosmétique, c'est ici que l'audience de l'agent est appliquée.
+  if (!canAccessAgent(agent, profile.role)) {
+    return Response.json(
+      { error: 'forbidden_agent', message: "Cet agent n'est pas disponible pour votre rôle." },
+      { status: 403 }
+    );
+  }
 
-  if (!isDemoMode) {
-    if (incomingConvId) {
-      conversation = await getConversation(incomingConvId);
-      if (!conversation || conversation.user_id !== user!.id) {
-        return Response.json(
-          { error: 'conversation_not_found', message: 'Conversation introuvable.' },
-          { status: 404 }
-        );
-      }
-    } else {
-      const firstUserMsg = messages.find((m) => m.role === 'user');
-      conversation = await createConversation({
-        userId: user!.id,
-        agentId,
-        title: firstUserMsg
-          ? generateConversationTitle(firstUserMsg.content)
-          : undefined,
-      });
-      if (!conversation) {
-        return Response.json(
-          { error: 'conversation_create_failed', message: 'Création de conversation impossible.' },
-          { status: 500 }
-        );
-      }
+  // 5. Récupération ou création de la conversation (RLS Supabase).
+  let conversation: { id: string; user_id: string; agent_id: string } | null;
+
+  if (incomingConvId) {
+    conversation = await getConversation(incomingConvId);
+    if (!conversation || conversation.user_id !== profile.id || conversation.agent_id !== agentId) {
+      return Response.json(
+        { error: 'conversation_not_found', message: 'Conversation introuvable.' },
+        { status: 404 }
+      );
     }
-
-    // 6. Persistance du dernier message user
-    const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
-    if (lastUserMessage) {
-      await addMessage({
-        conversationId: conversation.id,
-        role: 'user',
-        content: lastUserMessage.content,
-      });
+  } else {
+    const firstUserMsg = messages.find((m) => m.role === 'user');
+    conversation = await createConversation({
+      userId: profile.id,
+      agentId,
+      title: firstUserMsg
+        ? generateConversationTitle(firstUserMsg.content)
+        : undefined,
+    });
+    if (!conversation) {
+      return Response.json(
+        { error: 'conversation_create_failed', message: 'Création de conversation impossible.' },
+        { status: 500 }
+      );
     }
   }
+  const conversationId = conversation.id;
+
+  // 6. Persistance du dernier message user (garanti par le schéma Zod)
+  const lastUserMessage = messages[messages.length - 1]!;
+  await addMessage({
+    conversationId,
+    role: 'user',
+    content: lastUserMessage.content,
+  });
 
   // 7. Préparation du client OpenRouter
   let openrouter: ReturnType<typeof createOpenRouter>;
@@ -218,22 +227,16 @@ export async function POST(request: Request) {
   }
 
   // 7bis. RAG : injection du contexte fichiers dans le system prompt.
-  //       Skip en mode démo (pas de user.id, pas de fichiers indexés).
-  //       Robuste aux pannes : si Mistral down, le chat continue sans RAG.
+  //       Robuste aux pannes : si Nomic est down, le chat continue sans RAG.
   let systemPrompt = agent.systemPrompt;
-  if (!isDemoMode && user) {
-    const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
-    if (lastUserMsg) {
-      const rag = await buildRagContext(lastUserMsg.content, user.id, {
-        conversationId: conversation?.id ?? null,
-      });
-      if (rag.systemPromptAddon) {
-        systemPrompt = `${rag.systemPromptAddon}\n${agent.systemPrompt}`;
-        console.log(
-          `[/api/chat] RAG injected: ${rag.sources.length} sources for user ${user.id.slice(0, 8)}`
-        );
-      }
-    }
+  const rag = await buildRagContext(lastUserMessage.content, profile.id, {
+    conversationId,
+  });
+  if (rag.systemPromptAddon) {
+    systemPrompt = `${rag.systemPromptAddon}\n${agent.systemPrompt}`;
+    console.log(
+      `[/api/chat] RAG injected: ${rag.sources.length} sources for user ${profile.id.slice(0, 8)}`
+    );
   }
 
   // 8. Streaming
@@ -244,27 +247,22 @@ export async function POST(request: Request) {
       messages: messages as CoreMessage[],
       temperature: agent.temperature,
       onFinish: async ({ text, usage }) => {
-        // Persistance assistant — SKIP en mode démo.
-        if (!isDemoMode && conversation) {
-          await addMessage({
-            conversationId: conversation.id,
-            role: 'assistant',
-            content: text,
-            tokensIn: usage?.promptTokens ?? null,
-            tokensOut: usage?.completionTokens ?? null,
-            modelUsed: agent.model,
-          });
-        }
+        await addMessage({
+          conversationId,
+          role: 'assistant',
+          content: text,
+          tokensIn: usage?.promptTokens ?? null,
+          tokensOut: usage?.completionTokens ?? null,
+          modelUsed: agent.model,
+        });
       },
     });
 
     const responseHeaders: Record<string, string> = {
       'X-RateLimit-Remaining': String(rl.remaining),
       'X-RateLimit-Reset': String(rl.resetAt),
+      'X-Conversation-Id': conversationId,
     };
-    if (conversation) {
-      responseHeaders['X-Conversation-Id'] = conversation.id;
-    }
 
     return result.toDataStreamResponse({
       sendUsage: true,

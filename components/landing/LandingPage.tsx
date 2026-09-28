@@ -62,10 +62,10 @@ function TopNav() {
             Connexion
           </Link>
           <Link
-            href="/signup"
+            href="/login"
             className="group relative inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-br from-vercel-violet via-vercel-pink to-vercel-pink px-4 py-2 text-sm font-semibold text-white shadow-[0_0_20px_rgba(121,40,202,0.4)] transition-all hover:shadow-[0_0_30px_rgba(255,0,128,0.5)] hover:-translate-y-px"
           >
-            Creer un compte
+            Continuer avec GitHub
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
           </Link>
         </nav>
@@ -118,10 +118,10 @@ function Hero() {
 
           <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/signup"
+              href="/login"
               className="group relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-vercel-violet via-vercel-pink to-vercel-pink px-7 py-3.5 text-base font-semibold text-white shadow-[0_0_40px_rgba(121,40,202,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_50px_rgba(255,0,128,0.6)]"
             >
-              <span>Creer mon compte</span>
+              <span>Commencer avec GitHub</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
             </Link>
             <Link
@@ -340,10 +340,10 @@ function FinalCTA() {
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/signup"
+            href="/login"
             className="group relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-vercel-violet via-vercel-pink to-vercel-pink px-8 py-4 text-base font-semibold text-white shadow-[0_0_50px_rgba(121,40,202,0.6)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_60px_rgba(255,0,128,0.7)]"
           >
-            Creer mon compte
+            Commencer avec GitHub
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
           </Link>
         </div>

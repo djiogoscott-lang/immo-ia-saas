@@ -5,57 +5,63 @@
  *   1. Rafraîchir la session Supabase à chaque requête (via `updateSession`).
  *   2. Protéger les routes nécessitant l'auth :
  *        - /agents/*  → redirection vers /login si non connecté
- *        - /api/chat  → 401 si non connecté (la route renvoie elle-même)
- *   3. Empêcher d'accéder à /login et /signup quand on est déjà connecté.
+ *        - /api/*     → 401 JSON si non connecté
+ *   3. Refuser les comptes hors liste blanche (`ALLOWED_EMAILS`).
+ *   4. Empêcher d'accéder à /login quand on est déjà connecté.
  *
  * Routes publiques (toujours accessibles) :
- *   - /login, /signup
- *   - /auth/* (callbacks email, signout)
+ *   - /, /login
+ *   - /auth/* (callback OAuth, signout)
  *
  * Le matcher en bas exclut les assets statiques (.next, fichiers Next.js).
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { isEmailAllowed } from '@/lib/auth/allowlist';
 import { updateSession } from '@/lib/supabase/middleware';
 
-const PUBLIC_ROUTES = ['/login', '/signup'];
+const LOGIN_ROUTE = '/login';
 const AUTH_CALLBACK_PREFIX = '/auth/';
 
 function isProtectedRoute(pathname: string): boolean {
-  if (pathname.startsWith('/agents')) return true;
-  return false;
-}
-
-function isPublicRoute(pathname: string): boolean {
-  if (PUBLIC_ROUTES.includes(pathname)) return true;
-  if (pathname.startsWith(AUTH_CALLBACK_PREFIX)) return true;
-  return false;
+  return pathname.startsWith('/agents') || pathname.startsWith('/api/');
 }
 
 export async function middleware(request: NextRequest) {
-  // Mode démo : auth complètement désactivée, toutes les routes accessibles
-  // publiquement. ACTIVÉ PAR DÉFAUT — désactiver via DEMO_MODE=false en prod.
-  // ⚠️ TODO : repasser à `=== 'true'` dès que l'auth Supabase est validée.
-  if (process.env.DEMO_MODE !== 'false') {
-    return NextResponse.next();
-  }
-
   const { response, user } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
-  // Si user connecté ET sur /login ou /signup → renvoyer vers /agents
-  if (user && isPublicRoute(pathname) && !pathname.startsWith(AUTH_CALLBACK_PREFIX)) {
+  if (pathname.startsWith(AUTH_CALLBACK_PREFIX)) {
+    return response;
+  }
+
+  // Session valide mais compte non autorisé : traité comme non connecté.
+  const authorizedUser = user && isEmailAllowed(user.email) ? user : null;
+
+  // Si user autorisé ET sur /login → renvoyer vers /agents
+  if (authorizedUser && pathname === LOGIN_ROUTE) {
     const url = request.nextUrl.clone();
     url.pathname = '/agents';
+    url.search = '';
     return NextResponse.redirect(url);
   }
 
-  // Si user non connecté ET route protégée → redirect /login avec ?next=...
-  if (!user && isProtectedRoute(pathname)) {
+  if (!authorizedUser && isProtectedRoute(pathname)) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'unauthorized', message: 'Connexion requise.' },
+        { status: 401 }
+      );
+    }
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', pathname);
+    url.pathname = LOGIN_ROUTE;
+    url.search = '';
+    if (user) {
+      url.searchParams.set('error', 'not_allowed');
+    } else {
+      url.searchParams.set('next', pathname);
+    }
     return NextResponse.redirect(url);
   }
 

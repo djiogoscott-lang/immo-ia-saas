@@ -709,6 +709,14 @@ export function isValidAgentId(id: unknown): id is AgentId {
   return typeof id === 'string' && (AGENT_IDS as readonly string[]).includes(id);
 }
 
+/**
+ * Contrôle d'accès : l'agent est-il ouvert à ce rôle ? À appliquer côté
+ * serveur (pages + API), le filtrage de la sidebar n'étant que visuel.
+ */
+export function canAccessAgent(agent: AgentConfig, role: AgentAudience): boolean {
+  return agent.audience.includes(role);
+}
+
 /** Filtre les agents par audience (utile pour Sidebar selon le rôle de l'utilisateur connecté). */
 export function getAgentsForAudience(audience: AgentAudience): AgentConfig[] {
   return AGENT_LIST.filter((agent) => agent.audience.includes(audience));

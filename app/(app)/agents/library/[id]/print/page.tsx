@@ -30,9 +30,6 @@ interface PrintPageProps {
 export const dynamic = 'force-dynamic';
 
 export default async function PrintPage({ params }: PrintPageProps) {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) notFound();
-
   const user = await getCurrentUser();
   if (!user) notFound();
 

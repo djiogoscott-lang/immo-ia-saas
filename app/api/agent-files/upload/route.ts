@@ -53,19 +53,6 @@ function extFromMime(mime: AllowedMimeType): string {
 }
 
 export async function POST(request: Request) {
-  // --- 0. Mode démo ---------------------------------------------------------
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-  if (isDemoMode) {
-    return Response.json(
-      {
-        error: 'demo_mode',
-        message:
-          "L'upload de fichiers n'est pas disponible en mode démo. Connecte-toi pour activer le RAG.",
-      },
-      { status: 403 }
-    );
-  }
-
   // --- 1. Auth --------------------------------------------------------------
   const user = await getCurrentUser();
   if (!user) {

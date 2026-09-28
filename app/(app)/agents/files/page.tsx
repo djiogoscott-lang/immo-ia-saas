@@ -3,8 +3,6 @@
  *
  * Server Component : récupère la liste initiale, délègue l'UI interactive
  * (upload, delete) au composant client FilesPageClient.
- *
- * Mode démo : affiche une notice expliquant que le RAG nécessite l'auth.
  */
 
 import { FolderOpen } from 'lucide-react';
@@ -16,19 +14,13 @@ import { listAgentFiles, type AgentFile } from '@/lib/supabase/agent-files';
 export const dynamic = 'force-dynamic';
 
 export default async function FilesPage() {
-  const isDemoMode = process.env.DEMO_MODE !== 'false';
-
   let initialFiles: AgentFile[] = [];
-  let isAuthenticated = false;
 
-  if (!isDemoMode) {
-    const user = await getCurrentUser();
-    if (user) {
-      isAuthenticated = true;
-      // conversationId: null → uniquement le pool global (les fichiers attachés
-      // à une conversation précise sont gérés dans /agents/[id] directement).
-      initialFiles = await listAgentFiles(user.id, { limit: 100, conversationId: null });
-    }
+  const user = await getCurrentUser();
+  if (user) {
+    // conversationId: null → uniquement le pool global (les fichiers attachés
+    // à une conversation précise sont gérés dans /agents/[id] directement).
+    initialFiles = await listAgentFiles(user.id, { limit: 100, conversationId: null });
   }
 
   return (
@@ -54,28 +46,15 @@ export default async function FilesPage() {
         </div>
       </header>
 
-      {isDemoMode || !isAuthenticated ? (
-        <DemoNotice isDemoMode={isDemoMode} />
-      ) : (
+      {user ? (
         <FilesPageClient initialFiles={initialFiles} />
+      ) : (
+        <div className="rounded-2xl border border-amber-900/40 bg-amber-950/30 p-6 text-sm">
+          <p className="font-medium text-amber-200">
+            Connexion requise pour gérer tes fichiers RAG.
+          </p>
+        </div>
       )}
-    </div>
-  );
-}
-
-function DemoNotice({ isDemoMode }: { isDemoMode: boolean }) {
-  return (
-    <div className="rounded-2xl border border-amber-900/40 bg-amber-950/30 p-6 text-sm">
-      <p className="font-medium text-amber-200">
-        {isDemoMode
-          ? "L'upload de fichiers nécessite l'authentification Supabase."
-          : 'Connexion requise pour gérer tes fichiers RAG.'}
-      </p>
-      <p className="mt-2 text-amber-300/80">
-        {isDemoMode
-          ? "Désactive le mode démo (DEMO_MODE=false) et applique la migration v4_agent_files.sql pour activer le RAG en local."
-          : 'Reconnecte-toi via /auth pour accéder à cette page.'}
-      </p>
     </div>
   );
 }
