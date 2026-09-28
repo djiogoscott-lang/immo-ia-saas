@@ -273,6 +273,35 @@ export async function insertChunks(chunks: ChunkInput[]): Promise<{ error?: stri
   return {};
 }
 
+/**
+ * Le user a-t-il au moins un fichier indexé dans le périmètre de recherche
+ * (pool global + fichiers de cette conversation) ? Requête `head` sans
+ * transfert de lignes : permet d'éviter l'appel d'embedding (réseau + coût)
+ * quand il n'y a rien à chercher.
+ */
+export async function hasSearchableFiles(
+  userId: string,
+  conversationId: string | null
+): Promise<boolean> {
+  const supabase = await createClient();
+  let query = supabase
+    .from('agent_files')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'ready');
+
+  query = conversationId
+    ? query.or(`conversation_id.is.null,conversation_id.eq.${conversationId}`)
+    : query.is('conversation_id', null);
+
+  const { count, error } = await query;
+  if (error) {
+    console.error('[hasSearchableFiles]', error.message);
+    return false;
+  }
+  return (count ?? 0) > 0;
+}
+
 export interface MatchChunksOptions {
   threshold?: number; // 0..1, défaut 0.5
   count?: number;     // top-N, défaut 5

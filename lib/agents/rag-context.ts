@@ -14,7 +14,7 @@ import 'server-only';
  */
 
 import { embedQuery } from '@/lib/embeddings/nomic';
-import { matchChunks, type ChunkMatch } from '@/lib/supabase/agent-files';
+import { hasSearchableFiles, matchChunks, type ChunkMatch } from '@/lib/supabase/agent-files';
 
 export interface RagContext {
   /** Préfixe à ajouter au system prompt original (vide si pas de matches). */
@@ -43,6 +43,11 @@ export async function buildRagContext(
 ): Promise<RagContext> {
   const trimmed = userQuestion.trim();
   if (!trimmed) {
+    return { systemPromptAddon: '', sources: [] };
+  }
+
+  // Aucun fichier indexé → rien à chercher : on évite l'appel Nomic.
+  if (!(await hasSearchableFiles(userId, options.conversationId ?? null))) {
     return { systemPromptAddon: '', sources: [] };
   }
 

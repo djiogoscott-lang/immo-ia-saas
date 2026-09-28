@@ -206,15 +206,8 @@ export async function POST(request: Request) {
   }
   const conversationId = conversation.id;
 
-  // 6. Persistance du dernier message user (garanti par le schéma Zod)
-  const lastUserMessage = messages[messages.length - 1]!;
-  await addMessage({
-    conversationId,
-    role: 'user',
-    content: lastUserMessage.content,
-  });
-
-  // 7. Préparation du client OpenRouter
+  // 6. Préparation du client OpenRouter (avant toute écriture en base : une
+  //    config manquante ne doit pas laisser un message user orphelin)
   let openrouter: ReturnType<typeof createOpenRouter>;
   try {
     openrouter = getOpenRouterClient();
@@ -226,12 +219,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // 7bis. RAG : injection du contexte fichiers dans le system prompt.
-  //       Robuste aux pannes : si Nomic est down, le chat continue sans RAG.
+  // 7. En parallèle (indépendants) : persistance du dernier message user
+  //    (garanti par le schéma Zod) + construction du contexte RAG.
+  //    Le RAG est robuste aux pannes : si Nomic est down, le chat continue.
+  const lastUserMessage = messages[messages.length - 1]!;
+  const [, rag] = await Promise.all([
+    addMessage({
+      conversationId,
+      role: 'user',
+      content: lastUserMessage.content,
+    }),
+    buildRagContext(lastUserMessage.content, profile.id, { conversationId }),
+  ]);
+
   let systemPrompt = agent.systemPrompt;
-  const rag = await buildRagContext(lastUserMessage.content, profile.id, {
-    conversationId,
-  });
   if (rag.systemPromptAddon) {
     systemPrompt = `${rag.systemPromptAddon}\n${agent.systemPrompt}`;
     console.log(

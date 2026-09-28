@@ -15,18 +15,14 @@ import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { AgentSidebar } from '@/components/agents/AgentSidebar';
-import { getCurrentProfile } from '@/lib/auth/get-current-user';
-import { createClient } from '@/lib/supabase/server';
+import { getCurrentProfile, getCurrentUser } from '@/lib/auth/get-current-user';
 
 interface AgentsLayoutProps {
   children: ReactNode;
 }
 
 export default async function AgentsLayout({ children }: AgentsLayoutProps) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect('/login');
