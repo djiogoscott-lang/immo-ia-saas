@@ -487,7 +487,7 @@ returns table (
   content      text,
   similarity   float
 )
-language sql stable as $
+language sql stable as $$
   select
     c.id        as chunk_id,
     c.file_id,
@@ -506,7 +506,7 @@ language sql stable as $
     and 1 - (c.embedding <=> query_embedding) > p_threshold
   order by c.embedding <=> query_embedding asc
   limit p_count;
-$;
+$$;
 
 
 -- -----------------------------------------------------------------------------
@@ -557,7 +557,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   INSERT INTO public.profiles (id, full_name, role)
   VALUES (
@@ -572,7 +572,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$;
+$$;
 
 -- 2. Seul `full_name` est modifiable par l'utilisateur lui-même.
 --    La policy RLS "Users can update their own profile" reste en place
