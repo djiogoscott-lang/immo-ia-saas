@@ -62,7 +62,7 @@ export interface CreateDeliverableInput {
 export async function createDeliverable(
   input: CreateDeliverableInput
 ): Promise<Deliverable | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const frontmatter: Record<string, unknown> = {
     agent: input.agentId,
@@ -116,7 +116,7 @@ export async function listDeliverables(
   userId: string,
   options: ListDeliverablesOptions = {}
 ): Promise<Deliverable[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase
     .from('agent_deliverables')
     .select('*')
@@ -140,7 +140,7 @@ export async function listDeliverables(
 }
 
 export async function getDeliverable(id: string): Promise<Deliverable | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('agent_deliverables')
     .select('*')

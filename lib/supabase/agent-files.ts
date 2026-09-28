@@ -80,7 +80,7 @@ export async function uploadToStorage(
   body: ArrayBuffer | Buffer | Blob,
   contentType: string
 ): Promise<{ error?: string }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.storage
     .from(STORAGE_BUCKET)
     .upload(path, body, { contentType, upsert: false });
@@ -89,7 +89,7 @@ export async function uploadToStorage(
 }
 
 export async function deleteFromStorage(path: string): Promise<{ error?: string }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([path]);
   if (error) return { error: error.message };
   return {};
@@ -99,7 +99,7 @@ export async function getSignedDownloadUrl(
   path: string,
   expiresInSeconds = 300
 ): Promise<string | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.storage
     .from(STORAGE_BUCKET)
     .createSignedUrl(path, expiresInSeconds);
@@ -124,7 +124,7 @@ export interface CreateAgentFileInput {
 export async function createAgentFile(
   input: CreateAgentFileInput
 ): Promise<AgentFile | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('agent_files')
     .insert({
@@ -151,7 +151,7 @@ export async function updateAgentFileStatus(
   status: AgentFileStatus,
   options: { errorMessage?: string; chunksCount?: number } = {}
 ): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from('agent_files')
     .update({
@@ -169,7 +169,7 @@ export async function updateAgentFileStatus(
 }
 
 export async function getAgentFile(fileId: string): Promise<AgentFile | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('agent_files')
     .select('*')
@@ -196,7 +196,7 @@ export async function listAgentFiles(
   userId: string,
   options: ListAgentFilesOptions = {}
 ): Promise<AgentFile[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase
     .from('agent_files')
     .select('*')
@@ -239,7 +239,7 @@ export async function deleteAgentFile(
     return { error: `Storage : ${storageRes.error}` };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from('agent_files').delete().eq('id', fileId);
   if (error) return { error: error.message };
   return {};
@@ -255,7 +255,7 @@ export async function deleteAgentFile(
  */
 export async function insertChunks(chunks: ChunkInput[]): Promise<{ error?: string }> {
   if (chunks.length === 0) return {};
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // pgvector accepte les arrays via le format string '[v1,v2,...]'
   // pour garantir la compatibilité, on convertit explicitement.
@@ -289,7 +289,7 @@ export async function matchChunks(
   userId: string,
   options: MatchChunksOptions = {}
 ): Promise<ChunkMatch[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc('match_agent_files_chunks', {
     query_embedding: `[${queryEmbedding.join(',')}]`,
     p_user_id: userId,

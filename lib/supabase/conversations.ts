@@ -47,7 +47,7 @@ export async function createConversation(params: {
   agentId: AgentId;
   title?: string;
 }): Promise<Conversation | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('conversations')
     .insert({
@@ -69,7 +69,7 @@ export async function listConversations(
   userId: string,
   limit = 50
 ): Promise<Conversation[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('conversations')
     .select('*')
@@ -87,7 +87,7 @@ export async function listConversations(
 export async function getConversation(
   conversationId: string
 ): Promise<Conversation | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('conversations')
     .select('*')
@@ -105,7 +105,7 @@ export async function updateConversationTitle(
   conversationId: string,
   title: string
 ): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from('conversations')
     .update({ title })
@@ -119,7 +119,7 @@ export async function updateConversationTitle(
 }
 
 export async function deleteConversation(conversationId: string): Promise<boolean> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from('conversations')
     .delete()
@@ -137,7 +137,7 @@ export async function deleteConversation(conversationId: string): Promise<boolea
 // ---------------------------------------------------------------------------
 
 export async function getMessages(conversationId: string): Promise<DbMessage[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('messages')
     .select('*')
@@ -159,7 +159,7 @@ export async function addMessage(params: {
   tokensOut?: number | null;
   modelUsed?: string | null;
 }): Promise<DbMessage | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('messages')
     .insert({

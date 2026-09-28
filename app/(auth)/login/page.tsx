@@ -17,7 +17,7 @@ import { APP_NAME } from '@/lib/branding';
 import { createClient } from '@/lib/supabase/server';
 
 interface LoginPageProps {
-  searchParams: { next?: string; error?: string };
+  searchParams: Promise<{ next?: string; error?: string }>;
 }
 
 async function signInWithGitHub(formData: FormData) {
@@ -25,9 +25,9 @@ async function signInWithGitHub(formData: FormData) {
 
   const next = safeRedirectPath(String(formData.get('next') ?? ''));
   const origin =
-    process.env.NEXT_PUBLIC_APP_URL ?? `https://${headers().get('host') ?? 'localhost:3000'}`;
+    process.env.NEXT_PUBLIC_APP_URL ?? `https://${(await headers()).get('host') ?? 'localhost:3000'}`;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
@@ -47,7 +47,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   profile_missing: 'Profil introuvable. Contacte l’administrateur.',
 };
 
-export default function LoginPage({ searchParams }: LoginPageProps) {
+export default async function LoginPage(props: LoginPageProps) {
+  const searchParams = await props.searchParams;
   const errorMessage = searchParams.error
     ? ERROR_MESSAGES[searchParams.error] ?? 'Erreur inconnue.'
     : null;

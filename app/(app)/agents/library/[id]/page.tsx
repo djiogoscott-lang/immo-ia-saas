@@ -18,12 +18,13 @@ import { getDeliverable, serializeAsMarkdown } from '@/lib/supabase/deliverables
 import { cn } from '@/lib/utils';
 
 interface DeliverablePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = 'force-dynamic';
 
-export default async function DeliverablePage({ params }: DeliverablePageProps) {
+export default async function DeliverablePage(props: DeliverablePageProps) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user) {
     notFound();

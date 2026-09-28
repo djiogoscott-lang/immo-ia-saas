@@ -23,7 +23,7 @@ export interface Profile {
 }
 
 export async function getCurrentUser() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -31,7 +31,7 @@ export async function getCurrentUser() {
 }
 
 export async function getCurrentProfile(): Promise<Profile | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

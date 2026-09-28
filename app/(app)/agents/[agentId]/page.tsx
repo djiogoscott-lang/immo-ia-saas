@@ -20,11 +20,12 @@ import { getCurrentProfile } from '@/lib/auth/get-current-user';
 import { APP_NAME, APP_NAME_SHORT } from '@/lib/branding';
 
 interface AgentChatPageProps {
-  params: { agentId: string };
+  params: Promise<{ agentId: string }>;
 }
 
 // Métadonnées dynamiques par agent (titre d'onglet).
-export async function generateMetadata({ params }: AgentChatPageProps) {
+export async function generateMetadata(props: AgentChatPageProps) {
+  const params = await props.params;
   if (!isValidAgentId(params.agentId)) {
     return { title: `Agent introuvable — ${APP_NAME_SHORT}` };
   }
@@ -35,7 +36,8 @@ export async function generateMetadata({ params }: AgentChatPageProps) {
   };
 }
 
-export default async function AgentChatPage({ params }: AgentChatPageProps) {
+export default async function AgentChatPage(props: AgentChatPageProps) {
+  const params = await props.params;
   if (!isValidAgentId(params.agentId)) {
     notFound();
   }

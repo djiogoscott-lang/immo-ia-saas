@@ -23,7 +23,7 @@ interface AgentsLayoutProps {
 }
 
 export default async function AgentsLayout({ children }: AgentsLayoutProps) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

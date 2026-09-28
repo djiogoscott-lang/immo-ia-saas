@@ -24,12 +24,13 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { getDeliverable, serializeAsMarkdown } from '@/lib/supabase/deliverables';
 
 interface PrintPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export const dynamic = 'force-dynamic';
 
-export default async function PrintPage({ params }: PrintPageProps) {
+export default async function PrintPage(props: PrintPageProps) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user) notFound();
 

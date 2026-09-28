@@ -11,10 +11,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function DELETE(_request: Request, { params }: RouteContext) {
+export async function DELETE(_request: Request, props: RouteContext) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user) {
     return Response.json(
