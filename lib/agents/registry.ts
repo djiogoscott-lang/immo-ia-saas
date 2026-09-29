@@ -58,7 +58,7 @@ export type AgentAudience = 'conseiller' | 'manager' | 'assistante';
 export type AgentModel =
   | 'anthropic/claude-sonnet-4.6'
   | 'anthropic/claude-haiku-4.5'
-  | 'mistralai/mistral-large-2411';
+  | 'mistralai/mistral-large-2512';
 
 export type AgentCategory =
   | 'orchestrateur'   // Charly : qualifie + route
@@ -446,7 +446,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'orchestrateur',
     accent: 'indigo',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.6,
     systemPrompt: SYSTEM_PROMPT_CHARLY,
     routerKeywords: [
@@ -467,7 +467,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'communication',
     accent: 'sky',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.6,
     systemPrompt: SYSTEM_PROMPT_TOM,
     routerKeywords: [
@@ -489,7 +489,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'communication',
     accent: 'pink',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.8,
     systemPrompt: SYSTEM_PROMPT_JOHN,
     routerKeywords: [
@@ -511,7 +511,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'communication',
     accent: 'amber',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.4,
     systemPrompt: SYSTEM_PROMPT_LOU,
     routerKeywords: [
@@ -533,7 +533,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'production',
     accent: 'emerald',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.7,
     systemPrompt: SYSTEM_PROMPT_ELIO,
     routerKeywords: [
@@ -556,7 +556,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'analyse',
     accent: 'violet',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.2,
     systemPrompt: SYSTEM_PROMPT_MANUE,
     routerKeywords: [
@@ -578,7 +578,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'analyse',
     accent: 'rose',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.2,
     systemPrompt: SYSTEM_PROMPT_JULIA,
     routerKeywords: [
@@ -600,7 +600,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'pilotage',
     accent: 'orange',
     featured: true,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.5,
     systemPrompt: SYSTEM_PROMPT_RONY,
     routerKeywords: [
@@ -626,7 +626,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'analyse',
     accent: 'cyan',
     featured: false,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.4,
     systemPrompt: SYSTEM_PROMPT_THEO,
     routerKeywords: [
@@ -648,7 +648,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'analyse',
     accent: 'fuchsia',
     featured: false,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.3,
     systemPrompt: SYSTEM_PROMPT_INES,
     routerKeywords: [
@@ -670,7 +670,7 @@ export const AGENT_REGISTRY: Record<AgentId, AgentConfig> = {
     category: 'production',
     accent: 'lime',
     featured: false,
-    model: 'mistralai/mistral-large-2411',
+    model: 'mistralai/mistral-large-2512',
     temperature: 0.3,
     systemPrompt: SYSTEM_PROMPT_ANAIS,
     routerKeywords: [

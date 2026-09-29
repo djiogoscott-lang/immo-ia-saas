@@ -1,8 +1,9 @@
 import 'server-only';
 
 /**
- * OCR pour PDFs scannés / image-based via le modèle vision Pixtral Large
- * (mistralai/pixtral-large-2411) accessible via OpenRouter.
+ * OCR pour PDFs scannés / image-based via un modèle vision Mistral
+ * (Mistral Large 3, mistralai/mistral-large-2512, multimodal) accessible via
+ * OpenRouter. Pixtral Large 2411, utilisé à l'origine, a été retiré du catalogue.
  *
  * Flow :
  *   1. PDF -> images PNG (1 par page) via pdf-to-png-converter (pur JS)
@@ -22,7 +23,7 @@ import { pdfToPng } from 'pdf-to-png-converter';
 
 import { APP_NAME } from '@/lib/branding';
 
-const PIXTRAL_MODEL = 'mistralai/pixtral-large-2411';
+const VISION_MODEL = 'mistralai/mistral-large-2512';
 const MAX_PAGES = 10;
 const TIMEOUT_PER_PAGE_MS = 30_000;
 
@@ -134,7 +135,7 @@ async function ocrSingleImage(
         'X-Title': `${APP_NAME} - OCR`,
       },
       body: JSON.stringify({
-        model: PIXTRAL_MODEL,
+        model: VISION_MODEL,
         messages: [
           {
             role: 'system',
