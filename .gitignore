@@ -49,3 +49,5 @@ yarn-error.log*
 
 # Documents source (à garder hors versionnement applicatif)
 Instructions GPT.docx
+.vercel
+.env*
